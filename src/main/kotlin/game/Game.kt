@@ -76,12 +76,15 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
                 lastUpdate = System.currentTimeMillis()
                 tick()
                 Thread.sleep(
-                    0.coerceAtLeast((Conf.TARGET_STEP_TIME -
-                            (System.currentTimeMillis() - lastUpdate)).toInt()).toLong()
+                    0.coerceAtLeast(
+                        (Conf.TARGET_STEP_TIME -
+                                (System.currentTimeMillis() - lastUpdate)).toInt()
+                    ).toLong()
                 )
             }
         }
         thread.start()
+    }
 
 
     fun addEntity(ent: Entity) {
