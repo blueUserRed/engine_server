@@ -9,7 +9,7 @@ import java.io.DataOutputStream
 import java.io.IOException
 import java.net.Socket
 
-class ClientConnection(private val socket: Socket, private val server: Server, private val game: Game?) : Thread() {
+class ClientConnection(private val socket: Socket, private val server: Server, var tag: Int) : Thread() {
 
     private var stop: Boolean = false
     private val input: DataInputStream = DataInputStream(socket.getInputStream())
@@ -20,6 +20,7 @@ class ClientConnection(private val socket: Socket, private val server: Server, p
 
     override fun run() {
         while(!stop) { try {
+            val tag = input.readInt()
             val identifier = input.readUTF()
             val messageDeserializer = server.getMessageDeserializer(identifier)
             if (messageDeserializer == null) {
@@ -27,7 +28,12 @@ class ClientConnection(private val socket: Socket, private val server: Server, p
                 continue
             }
             val message = messageDeserializer(input) ?: continue
-            message.execute(this, game)
+            val receiver = server.getMessageReceiver(tag)
+            if (receiver == null) {
+                Conf.logger.warning("Received Message with unknown tag $tag")
+                continue
+            }
+            receiver.receive(message, this)
         } catch(e: IOException) { break } }
     }
 

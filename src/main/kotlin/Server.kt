@@ -2,25 +2,24 @@ import game.Conf
 import game.Game
 import networking.ClientConnection
 import networking.Message
+import networking.MessageReceiver
 import java.io.DataInputStream
 import java.io.IOException
 import java.net.ServerSocket
 
-abstract class Server(private val portRange: IntRange) {
+abstract class Server(val port: Int) : MessageReceiver {
 
     private val messageDeserializers: MutableMap<String, ServerMessageDeserializer> = mutableMapOf()
 
-    private val games: MutableList<Game> = mutableListOf()
-
-    private val usedPorts: MutableList<Int> = mutableListOf() //TODO: fixxxxx
+    val games: MutableList<Game> = mutableListOf()
 
     private val stop: Boolean = false
 
+    private var tagCount = 1 //0 reserved for server
+
     private val gameInitializers: MutableList<GameInitializer> = mutableListOf()
 
-    var mainPort: Int? = null
-        private set
-
+    private val connections: MutableList<ClientConnection> = mutableListOf()
 
     fun launch() {
         initialize()
@@ -30,18 +29,11 @@ abstract class Server(private val portRange: IntRange) {
     }
 
     private fun startListening() {
-        val port = getFreePort()
-        if (port == null) {
-            Conf.logger.severe("Couldn't create Server because no port is available!")
-            return
-        }
-        mainPort = port
         val socket = ServerSocket(port)
-        val connections: MutableList<ClientConnection> = mutableListOf()
         Thread {
             while(!stop) {
                 try {
-                    val connection = ClientConnection(socket.accept(), this, null)
+                    val connection = ClientConnection(socket.accept(), this, 0)
                     connections.add(connection)
                     connection.start()
                 } catch (e: IOException) { break }
@@ -50,26 +42,13 @@ abstract class Server(private val portRange: IntRange) {
         }.start()
     }
 
-    fun addGame() {
-        val port = getFreePort()
-        if (port == null) {
-            Conf.logger.severe("Tried to create Game, but all Ports are used")
-            return
-        }
-        val game = Game(port, this)
-        for (initializer in gameInitializers) initializer(game)
+    fun addGame(): Game {
+        val game = Game(tagCount, this)
         games.add(game)
+        tagCount++
+        for (initializer in gameInitializers) initializer(game)
         game.start()
-    }
-
-    private fun getFreePort(): Int? {
-        for (port in portRange) {
-            if (port !in usedPorts) {
-                usedPorts.add(port)
-                return port
-            }
-        }
-        return null
+        return game
     }
 
     fun addMessageDeserializer(identifier: String, deserializer: ServerMessageDeserializer) {
@@ -89,8 +68,26 @@ abstract class Server(private val portRange: IntRange) {
         this.gameInitializers.add(initializer)
     }
 
+    fun getMessageReceiver(tag: Int): MessageReceiver? {
+        if (tag == 0) return this
+        for (game in games) if (game.tag == tag) return game //TODO: make sure client is actually in game
+        return null
+    }
+
+    fun broadcast(tag: Int, message: Message) {
+        if (tag == 0) {
+            for (con in connections) con.send(message)
+            return
+        }
+        for (con in connections) if (con.tag == tag) con.send(message)
+    }
+
     fun removeGameInitializer(initializer: GameInitializer) {
         this.gameInitializers.remove(initializer)
+    }
+
+    override fun receive(message: Message, con: ClientConnection) {
+        message.execute(con, null)
     }
 
     abstract fun initialize()

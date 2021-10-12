@@ -7,19 +7,17 @@ import game.entities.PolygonEntity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import networking.ClientConnection
-import networking.FullUpdateMessage
-import networking.GameNetworker
+import networking.*
 
 
-class Game(val port: Int, val server: Server) {
+class Game(val tag: Int, val server: Server) : MessageReceiver {
 
     val entities: MutableList<Entity> = mutableListOf()
 
     private var lastStepCountTime: Long = 0
     private var curStepCount: Int = 0
 
-    private val players: MutableList<Pair<Player, ClientConnection>> = mutableListOf()
+    val players: MutableList<Pair<Player, ClientConnection>> = mutableListOf()
 
     var stepRate: Int = 0
         private set
@@ -31,11 +29,8 @@ class Game(val port: Int, val server: Server) {
     var collisionResolver: CollisionResolver = MainCollisionResolver()
     var gameSerializer: GameSerializer = MainGameSerializer()
 
-    val networker: GameNetworker = GameNetworker(this, port, server)
-
     fun start() {
-        networker.start()
-        Conf.logger.info("Game started on Port $port")
+        Conf.logger.info("Game started with tag $tag")
         loop()
     }
 
@@ -71,7 +66,7 @@ class Game(val port: Int, val server: Server) {
         curStepCount++
         update()
         val message = FullUpdateMessage(this@Game)
-        networker.broadcast(message)
+        server.broadcast(tag, message)
     }
 
     private fun loop() {
@@ -87,7 +82,7 @@ class Game(val port: Int, val server: Server) {
             }
         }
         thread.start()
-    }
+
 
     fun addEntity(ent: Entity) {
         this.entities.add(ent)
@@ -96,6 +91,7 @@ class Game(val port: Int, val server: Server) {
     fun addPlayer(player: Player, con: ClientConnection, ent: Entity?) {
         player.entity = ent
         con.player = player
+        con.tag = tag
         players.add(Pair(player, con))
         if (ent == null) return
         ent.player = player
@@ -104,7 +100,10 @@ class Game(val port: Int, val server: Server) {
 
     fun stop() {
         this.isRunning = false
-        this.networker.close()
+    }
+
+    override fun receive(message: Message, con: ClientConnection) {
+        message.execute(con, this)
     }
 
 }

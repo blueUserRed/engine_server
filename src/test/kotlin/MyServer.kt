@@ -4,7 +4,7 @@ import game.entities.Player
 import game.entities.PolygonEntity
 import utils.Vector2D
 
-object MyServer : Server(3333..4444) {
+object MyServer : Server(3333) {
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -12,7 +12,8 @@ object MyServer : Server(3333..4444) {
     }
 
     override fun initialize() {
-
+        addMessageDeserializer("gameJoin") { GameJoinMessage.deserialize(it) }
+        addMessageDeserializer("gameJoinAns") { GameJoinAnswer.deserialize(it) }
     }
 
     override fun onStart() {
@@ -33,22 +34,8 @@ object MyServer : Server(3333..4444) {
                 box.addBehavior(gravityBehavior)
                 box.addBehavior(frictionBehaviour)
             }
-            game.networker.addOnMessageCallback { _, con ->
-                val playerEntity = PolygonEntity(Vector2D(200.0, 500.0), 100.0, 100.0, 1.0)
-                val player = MyPlayer()
-                playerEntity.restitution = 0.2
-                playerEntity.addBehavior(MyPlayerMovementBehavior(player,600.0))
-                playerEntity.addBehavior(gravityBehavior)
-                playerEntity.addBehavior(frictionBehaviour)
-                playerEntity.staticFriction = 0.06
-                playerEntity.dynamicFriction = 0.05
-                playerEntity.addBehavior(MyPlayerMovementBehavior(player, 600.0))
-                playerEntity.addBehavior(gravityBehavior)
-                game.addPlayer(player, con, playerEntity)
-            }
         }
-        Conf.logger.info("Server started on Port ${this.mainPort}")
-        this.addGame()
+        Conf.logger.info("Server started on Port ${this.port}")
     }
 
 }
