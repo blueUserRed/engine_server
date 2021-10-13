@@ -33,13 +33,12 @@ class GameJoinMessage : Message() {
         val frictionBehaviour = FrictionBehaviour(0.0, 0.04)
         val player = MyPlayer()
         playerEntity.restitution = 0.2
-        playerEntity.addBehavior(MyPlayerMovementBehavior(player,600.0))
+        playerEntity.addBehavior(MyPlayerMovementBehavior(player,600.0, 80000.0))
         playerEntity.addBehavior(gravityBehavior)
         playerEntity.addBehavior(frictionBehaviour)
         playerEntity.staticFriction = 0.06
         playerEntity.dynamicFriction = 0.05
-        playerEntity.addBehavior(MyPlayerMovementBehavior(player, 600.0))
-        playerEntity.addBehavior(gravityBehavior)
+        println("${playerEntity.aabb.width}, ${playerEntity.aabb.height}")
         game.addPlayer(player, con, playerEntity)
     }
 

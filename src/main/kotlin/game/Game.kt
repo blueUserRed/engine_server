@@ -1,13 +1,12 @@
 package game
 
 import Server
-import game.entities.Entity
-import game.entities.Player
-import game.entities.PolygonEntity
+import game.entities.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import networking.*
+import utils.Stopwatch
 
 
 class Game(val tag: Int, val server: Server) : MessageReceiver {
@@ -27,6 +26,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
 
     var collisionChecker: CollisionChecker = SatCollisionChecker()
     var collisionResolver: CollisionResolver = MainCollisionResolver()
+    var broadCollisionChecker: BroadCollisionChecker = MainBroadCollisionChecker()
     var gameSerializer: GameSerializer = MainGameSerializer()
 
     fun start() {
@@ -35,13 +35,15 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     }
 
     private suspend fun update() = coroutineScope {
-        doCollisions()
-        for (ent in entities) async {
-            ent.update()
+        for (i in 0..Conf.SUBSTEP_COUNT) {
+            doCollisions()
+            for (ent in entities) ent.step(Conf.SUBSTEP_COUNT)
         }
+        doCollisions()
+        for (ent in entities) async { ent.update() }
     }
 
-    private suspend fun doCollisions() = coroutineScope {
+    private suspend fun doCollisionsOld() = coroutineScope {
         val colChecker = collisionChecker
         val colResolver = collisionResolver
         for (i in 0 until entities.size) {
@@ -54,6 +56,15 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
                     colResolver.resolveCollision(result)
                 }
             }
+        }
+    }
+
+    private suspend fun doCollisions() = coroutineScope {
+        val candidates = broadCollisionChecker.getCollisionCandidates(entities)
+        for (candidatePair in candidates) async {
+            val result =
+                collisionChecker.checkPolygonCollision(candidatePair.first, candidatePair.second) ?: return@async
+            collisionResolver.resolveCollision(result)
         }
     }
 

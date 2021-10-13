@@ -10,6 +10,7 @@ object Conf {
 
     const val TARGET_STEP_RATE: Int = 60
     const val TARGET_STEP_TIME: Int = 1000 / TARGET_STEP_RATE
+    const val SUBSTEP_COUNT: Int = 6
 
     val logger: Logger = Logger.getLogger("Server")
 

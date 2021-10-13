@@ -19,6 +19,7 @@ object MyServer : Server(3333) {
     override fun onStart() {
         this.addGameInitializer { game ->
             val floor = PolygonEntity(Vector2D(500, 20), 1000.0, 40.0, Double.POSITIVE_INFINITY)
+            println("${floor.aabb.width}, ${floor.aabb.height}")
             game.addEntity(floor)
             floor.staticFriction = 0.06
             floor.dynamicFriction = 0.05

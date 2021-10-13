@@ -1,11 +1,15 @@
 package game.entities
 
+import game.AABB
 import utils.Utils
 import utils.Vector2D
-import utils.toByteArray
 import java.io.DataOutputStream
 
 open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, density: Double) : Entity(position) {
+
+    final override val aabb: AABB
+
+    override val identifier: Int = Int.MAX_VALUE
 
     constructor(position: Vector2D, width: Double, height: Double, density: Double) : this(position, arrayOf(
         Vector2D(0.0, 0.0),
@@ -13,8 +17,6 @@ open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, density:
         Vector2D(width, height),
         Vector2D(width, 0.0)
     ), density)
-
-    override val identifier: Int = Int.MAX_VALUE
 
     val verticesRelative: Array<Vector2D>
 
@@ -43,8 +45,9 @@ open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, density:
     init {
         verticesRelative = Utils.getShapeWithCentroidZero(vertices)
         val result = Utils.calculateMassAndInertia(vertices, density)
+        aabb = getAABB(verticesRelative)
         this.mass = result.first
-        this.inertia = result.second / 10
+        this.inertia = result.second // 10
     }
 
     override fun serialize(output: DataOutputStream) {
@@ -52,6 +55,12 @@ open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, density:
         for (vert in verticesRelative) vert.serialize(output)
         position.serialize(output)
         output.writeDouble(rotation)
+    }
+
+    private fun getAABB(verts: Array<Vector2D>): AABB {
+        var max = Vector2D()
+        for (vert in verts) if (vert.mag > max.mag) max = vert
+        return AABB(max.mag * 2, max.mag * 2) //TODO: fix
     }
 
 }

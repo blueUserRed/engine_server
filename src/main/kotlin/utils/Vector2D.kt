@@ -11,8 +11,7 @@ class Vector2D (val x: Double, val y: Double) {
     constructor(n: Double) : this(n, n)
     constructor(n: Int) : this(n, n)
 
-    val mag: Double
-        get() = sqrt(this.x * this.x + this.y * this.y)
+    val mag: Double = sqrt(this.x * this.x + this.y * this.y)
 
     val unit: Vector2D
         get() {

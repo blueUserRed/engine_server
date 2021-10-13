@@ -1,6 +1,7 @@
 package game.entities
 
 import EntityBehavior
+import game.AABB
 import utils.Vector2D
 import java.io.DataOutputStream
 
@@ -28,24 +29,30 @@ abstract class Entity(position: Vector2D) {
 
     var restitution: Double = -0.1
 
-    var staticFriction: Double = 1 / 51.0
+    var staticFriction: Double =0.06
 
-    var dynamicFriction: Double = 1 / 10.0
+    var dynamicFriction: Double = 0.05
 
     var inertia: Double = 1.0
 
+
     abstract val identifier: Int
+
+    abstract val aabb: AABB
 
     protected var behaviors: MutableList<EntityBehavior> = mutableListOf()
         private set
 
 
     open fun update() {
-        this.position += this.velocity
-        this.rotation += this.angularVelocity
-        this.rotation = this.rotation % (2 * Math.PI)
         for (behavior in this.behaviors) behavior.update(this)
         if (player != null) player?.handleKeyInputs()
+    }
+
+    open fun step(substeps: Int) {
+        this.position += this.velocity / substeps.toDouble()
+        this.rotation += this.angularVelocity * 4 / substeps.toDouble()
+        this.rotation = this.rotation % (2 * Math.PI)
     }
 
    fun applyForce(force: Vector2D, offset: Vector2D = Vector2D()) {
