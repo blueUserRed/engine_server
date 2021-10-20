@@ -1,9 +1,10 @@
 package game
 
-import game.entities.Entity
+import utils.Vector2D
+import utils.compare
 import java.io.DataOutputStream
 
-abstract class RenderInformation() {
+abstract class RenderInformation{
 
     abstract val identifier: Int
 
@@ -41,4 +42,27 @@ class PolyColorRenderInfo : RenderInformation() {
     override fun equals(other: Any?): Boolean {
         return other is PolyColorRenderInfo && other.color == color
     }
+}
+
+class PolyImageRenderInfo(
+    var offset: Vector2D,
+    var width: Double,
+    var height: Double,
+    var imgIdentifier: String
+    ) : RenderInformation() {
+
+    override val identifier: Int = Int.MAX_VALUE - 2
+
+    override fun serialize(output: DataOutputStream) {
+        offset.serialize(output)
+        output.writeDouble(width)
+        output.writeDouble(height)
+        output.writeUTF(imgIdentifier)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is PolyImageRenderInfo && other.offset == this.offset && other.width.compare(this.width) &&
+                other.height.compare(this.height) && other.imgIdentifier == this.imgIdentifier
+    }
+
 }

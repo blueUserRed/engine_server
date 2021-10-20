@@ -1,7 +1,4 @@
-import game.Color
-import game.Conf
-import game.Game
-import game.PolyColorRenderInfo
+import game.*
 import game.entities.PolygonEntity
 import networking.ClientConnection
 import networking.Message
@@ -37,10 +34,11 @@ class GameJoinMessage : Message() {
         playerEntity.addBehavior(MyPlayerMovementBehavior(player,900.0, 80000.0))
         playerEntity.addBehavior(gravityBehavior)
         playerEntity.addBehavior(frictionBehaviour)
+        playerEntity.renderInformation = PolyImageRenderInfo(Vector2D(-50, 50), 100.0, 100.0, "cobble")
         playerEntity.staticFriction = 0.06
         playerEntity.dynamicFriction = 0.05
-        playerEntity.renderInformation = PolyColorRenderInfo()
-        (playerEntity.renderInformation as PolyColorRenderInfo).color = Color.valueOf("#ff00ff")
+//        playerEntity.renderInformation = PolyColorRenderInfo()
+//        (playerEntity.renderInformation as PolyColorRenderInfo).color = Color.valueOf("#ff00ff")
         game.addPlayer(player, con, playerEntity)
     }
 

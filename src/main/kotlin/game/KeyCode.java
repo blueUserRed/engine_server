@@ -300,14 +300,10 @@ public enum KeyCode {
 
     static {
         KeyCode[] var0 = values();
-        int var1 = var0.length;
-
         for (KeyCode var3 : var0) {
             nameMap.put(var3.name, var3);
         }
-
     }
-
     private static class KeyCodeClass {
         private static final int FUNCTION = 1;
         private static final int NAVIGATION = 2;

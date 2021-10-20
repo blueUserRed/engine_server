@@ -119,3 +119,7 @@ fun Long.toByteArray(): Array<Byte> {
     buffer[7] = (this shr 64).toByte()
     return buffer
 }
+
+fun Double.compare(other: Double, epsilon: Double = 0.01): Boolean {
+    return Utils.compareDouble(this, other, epsilon)
+}

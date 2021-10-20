@@ -2,7 +2,6 @@ package networking
 
 import Server
 import game.Conf
-import game.Game
 import game.entities.Player
 import java.io.DataInputStream
 import java.io.DataOutputStream

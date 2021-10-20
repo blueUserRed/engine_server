@@ -120,6 +120,7 @@ abstract class Entity(position: Vector2D) {
         }
         if (renderInformation != shadow.renderInformation) {
             output.writeByte(2)
+            output.writeInt(renderInformation.identifier)
             renderInformation.serialize(output)
         }
         output.writeByte(0xff)

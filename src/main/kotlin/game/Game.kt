@@ -35,9 +35,9 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     }
 
     private suspend fun update() = coroutineScope {
-//        for (ent in entities) async { ent.update() } //TODO: change back??
         for (ent in entities) ent.updateShadow()
-        for (ent in entities) ent.update()
+        for (ent in entities) async { ent.update() }
+//        for (ent in entities) ent.update()
         for (i in 0..Conf.SUBSTEP_COUNT) {
             for (ent in entities) ent.step(Conf.SUBSTEP_COUNT)
             doCollisions()
@@ -86,7 +86,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         server.broadcast(tag, message)
     }
 
-    private fun loop() { //TODO: jump causes lag
+    private fun loop() {
         val thread = Thread {
             var lastUpdate: Long
             while (isRunning) {
