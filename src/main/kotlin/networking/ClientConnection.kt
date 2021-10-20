@@ -18,6 +18,8 @@ class ClientConnection(private val socket: Socket, private val server: Server, v
     var player: Player? = null
         internal set
 
+    private val onFinishedCallbacks: MutableList<() -> Unit> = mutableListOf()
+
     override fun run() {
         while(!stop) { try {
             val tag = input.readInt()
@@ -25,21 +27,55 @@ class ClientConnection(private val socket: Socket, private val server: Server, v
             val messageDeserializer = server.getMessageDeserializer(identifier)
             if (messageDeserializer == null) {
                 Conf.logger.warning("Server received message with unknown identifier '$identifier'")
+                resync(input)
                 continue
             }
             val message = messageDeserializer(input) ?: continue
-            val receiver = server.getMessageReceiver(tag)
+            val receiver = server.getMessageReceiver(tag, this)
             if (receiver == null) {
-                Conf.logger.warning("Received Message with unknown tag $tag")
+                Conf.logger.warning("Received Message with unknown or unauthorized tag '$tag'")
+                resync(input)
                 continue
             }
             receiver.receive(message, this)
+            for (i in 1..7) input.readByte() //trailer
         } catch(e: IOException) { break } }
+        for (callback in onFinishedCallbacks) callback()
+    }
+
+
+    private fun resync(input: DataInputStream) {
+        Conf.logger.warning("ClientConnection got desynced, now attempting to resync...")
+        while (true) {
+            if (input.readByte() != 0xff.toByte()) continue
+            if (input.readByte() != 0x00.toByte()) continue
+            if (input.readByte() != 0xff.toByte()) continue
+            if (input.readByte() != 0x00.toByte()) continue
+
+            val byte = input.readByte()
+            if (byte == 0x01.toByte()) return
+            if (byte != 0xff.toByte()) continue
+
+            if (input.readByte() != 0x00.toByte()) continue
+            if (input.readByte() != 0x01.toByte()) continue
+            return
+        }
+    }
+
+    private fun sendTrailer(output: DataOutputStream) {
+        output.writeByte(0xff)
+        output.writeByte(0x00)
+        output.writeByte(0xff)
+        output.writeByte(0x00)
+        output.writeByte(0xff)
+        output.writeByte(0x00)
+        output.writeByte(0x01)
     }
 
     fun send(message: Message) = try {
         output.writeUTF(message.identifier)
         message.serialize(output)
+        sendTrailer(output)
         output.flush()
     } catch (e: IOException) { close() }
 
@@ -50,6 +86,14 @@ class ClientConnection(private val socket: Socket, private val server: Server, v
         this.socket.close()
         this.input.close()
         this.output.close()
+    }
+
+    fun addOnFinishedCallback(callback: () -> Unit) {
+        onFinishedCallbacks.add(callback)
+    }
+
+    fun removeOnFinishedCallback(callback: () -> Unit) {
+        onFinishedCallbacks.remove(callback)
     }
 
 }

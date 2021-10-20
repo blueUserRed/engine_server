@@ -1,7 +1,5 @@
 package game
 
-import utils.Utils
-import utils.Vector2D
 import utils.cross
 import kotlin.math.abs
 import kotlin.math.min
@@ -74,7 +72,6 @@ class MainCollisionResolver : CollisionResolver {
 
         ent1.applyForce(tangentImpulse, ra)
         ent2.applyForce(tangentImpulse, rb)
-
     }
 
 

@@ -1,12 +1,13 @@
+import game.Color
 import game.Conf
 import game.Game
+import game.PolyColorRenderInfo
 import game.entities.PolygonEntity
 import networking.ClientConnection
 import networking.Message
 import utils.Vector2D
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.lang.IllegalStateException
 
 class GameJoinMessage : Message() {
 
@@ -33,12 +34,13 @@ class GameJoinMessage : Message() {
         val frictionBehaviour = FrictionBehaviour(0.0, 0.04)
         val player = MyPlayer()
         playerEntity.restitution = 0.2
-        playerEntity.addBehavior(MyPlayerMovementBehavior(player,600.0, 80000.0))
+        playerEntity.addBehavior(MyPlayerMovementBehavior(player,900.0, 80000.0))
         playerEntity.addBehavior(gravityBehavior)
         playerEntity.addBehavior(frictionBehaviour)
         playerEntity.staticFriction = 0.06
         playerEntity.dynamicFriction = 0.05
-        println("${playerEntity.aabb.width}, ${playerEntity.aabb.height}")
+        playerEntity.renderInformation = PolyColorRenderInfo()
+        (playerEntity.renderInformation as PolyColorRenderInfo).color = Color.valueOf("#ff00ff")
         game.addPlayer(player, con, playerEntity)
     }
 

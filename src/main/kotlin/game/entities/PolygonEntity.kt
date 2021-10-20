@@ -44,23 +44,27 @@ open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, density:
 
     init {
         verticesRelative = Utils.getShapeWithCentroidZero(vertices)
-        val result = Utils.calculateMassAndInertia(vertices, density)
         aabb = getAABB(verticesRelative)
+        val result = Utils.calculateMassAndInertia(vertices, density)
         this.mass = result.first
-        this.inertia = result.second // 10
+        this.inertia = result.second
     }
 
     override fun serialize(output: DataOutputStream) {
+        output.writeLong(uuid.mostSignificantBits)
+        output.writeLong(uuid.leastSignificantBits)
         output.writeInt(verticesRelative.size)
         for (vert in verticesRelative) vert.serialize(output)
         position.serialize(output)
         output.writeDouble(rotation)
+        output.writeInt(renderInformation.identifier)
+        renderInformation.serialize(output)
     }
 
     private fun getAABB(verts: Array<Vector2D>): AABB {
         var max = Vector2D()
         for (vert in verts) if (vert.mag > max.mag) max = vert
-        return AABB(max.mag * 2, max.mag * 2) //TODO: fix
+        return AABB(max.mag * 2, max.mag * 2)
     }
 
 }

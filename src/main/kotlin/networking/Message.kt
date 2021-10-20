@@ -32,6 +32,7 @@ abstract class Message {
 }
 
 class HeartBeatMessage(val isResponse: Boolean, val testString: String) : Message() {
+
     override val identifier: String = "HeartBeat"
 
     override fun execute(con: ClientConnection, game: Game?) {
@@ -58,6 +59,19 @@ class FullUpdateMessage(val game: Game) : Message() {
         game.gameSerializer.serialize(output, game)
     }
 
+}
+
+class IncrementalUpdateMessage(val game: Game) : Message() {
+
+    override val identifier: String = "incUpdt"
+
+    override fun execute(con: ClientConnection, game: Game?) {
+        throw ThisShouldNeverBeThrownException()
+    }
+
+    override fun serialize(output: DataOutputStream) {
+        game.gameSerializer.serializeIncremental(output, game)
+    }
 }
 
 

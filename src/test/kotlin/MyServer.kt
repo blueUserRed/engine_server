@@ -1,5 +1,7 @@
+import game.Color
 import game.Conf
 import game.Game
+import game.PolyColorRenderInfo
 import game.entities.Player
 import game.entities.PolygonEntity
 import utils.Vector2D
@@ -19,7 +21,8 @@ object MyServer : Server(3333) {
     override fun onStart() {
         this.addGameInitializer { game ->
             val floor = PolygonEntity(Vector2D(500, 20), 1000.0, 40.0, Double.POSITIVE_INFINITY)
-            println("${floor.aabb.width}, ${floor.aabb.height}")
+            floor.renderInformation = PolyColorRenderInfo()
+            (floor.renderInformation as PolyColorRenderInfo).color = Color.valueOf("#00ffff")
             game.addEntity(floor)
             floor.staticFriction = 0.06
             floor.dynamicFriction = 0.05
@@ -27,10 +30,12 @@ object MyServer : Server(3333) {
             val gravityBehavior = GravityBehavior(0.1)
             val frictionBehaviour = FrictionBehaviour(0.0, 0.04)
             for (i in 0..6) {
-                val box = PolygonEntity(Vector2D(i * 40, i * 200), 50.0 + i * 10.0, 50.0, 0.6)
+                val box = PolygonEntity(Vector2D(600, i * 200), 50.0 + i * 10.0, 50.0, 0.6)
+//                val box = PolygonEntity(Vector2D(i * 40, i * 200), 50.0 + i * 10.0, 50.0, 0.6)
                 box.restitution = 0.1
                 box.staticFriction = 0.06
                 box.dynamicFriction = 0.05
+                box.renderInformation = PolyColorRenderInfo()
                 game.addEntity(box)
                 box.addBehavior(gravityBehavior)
                 box.addBehavior(frictionBehaviour)

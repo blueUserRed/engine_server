@@ -9,7 +9,7 @@ import java.net.ServerSocket
 
 abstract class Server(val port: Int) : MessageReceiver {
 
-    private val messageDeserializers: MutableMap<String, ServerMessageDeserializer> = mutableMapOf()
+    private val messageDeserializers: MutableMap<String, MessageDeserializer> = mutableMapOf()
 
     val games: MutableList<Game> = mutableListOf()
 
@@ -36,6 +36,7 @@ abstract class Server(val port: Int) : MessageReceiver {
                     val connection = ClientConnection(socket.accept(), this, 0)
                     connections.add(connection)
                     connection.start()
+                    connection.addOnFinishedCallback { connections.remove(connection) }
                 } catch (e: IOException) { break }
             }
             for (connection in connections) if (connection.isActive()) connection.close()
@@ -51,7 +52,7 @@ abstract class Server(val port: Int) : MessageReceiver {
         return game
     }
 
-    fun addMessageDeserializer(identifier: String, deserializer: ServerMessageDeserializer) {
+    fun addMessageDeserializer(identifier: String, deserializer: MessageDeserializer) {
         if (identifier in messageDeserializers.keys) {
             Conf.logger.severe("Failed to add Message-Deserializer with identifier '$identifier' " +
                     "because  identifier is already in use!")
@@ -60,7 +61,7 @@ abstract class Server(val port: Int) : MessageReceiver {
         this.messageDeserializers[identifier] = deserializer
     }
 
-    fun getMessageDeserializer(identifier: String): ServerMessageDeserializer? {
+    fun getMessageDeserializer(identifier: String): MessageDeserializer? {
         return messageDeserializers[identifier]
     }
 
@@ -68,9 +69,12 @@ abstract class Server(val port: Int) : MessageReceiver {
         this.gameInitializers.add(initializer)
     }
 
-    fun getMessageReceiver(tag: Int): MessageReceiver? {
+    fun getMessageReceiver(tag: Int, con: ClientConnection): MessageReceiver? {
         if (tag == 0) return this
-        for (game in games) if (game.tag == tag) return game //TODO: make sure client is actually in game
+        for (game in games) if (game.tag == tag) {
+            for (pl in game.players) if (con.player === pl.first) return game
+            return null
+        }
         return null
     }
 
@@ -95,5 +99,5 @@ abstract class Server(val port: Int) : MessageReceiver {
 
 }
 
-typealias ServerMessageDeserializer = (input: DataInputStream) -> Message?
+typealias MessageDeserializer = (input: DataInputStream) -> Message?
 typealias GameInitializer = (game: Game) -> Unit

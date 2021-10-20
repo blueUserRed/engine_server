@@ -8,13 +8,13 @@ import kotlinx.coroutines.runBlocking
 import networking.*
 import utils.Stopwatch
 
-
 class Game(val tag: Int, val server: Server) : MessageReceiver {
 
     val entities: MutableList<Entity> = mutableListOf()
 
     private var lastStepCountTime: Long = 0
     private var curStepCount: Int = 0
+    private var incTickCounter: Int = 0
 
     val players: MutableList<Pair<Player, ClientConnection>> = mutableListOf()
 
@@ -35,12 +35,13 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     }
 
     private suspend fun update() = coroutineScope {
+//        for (ent in entities) async { ent.update() } //TODO: change back??
+        for (ent in entities) ent.updateShadow()
+        for (ent in entities) ent.update()
         for (i in 0..Conf.SUBSTEP_COUNT) {
-            doCollisions()
             for (ent in entities) ent.step(Conf.SUBSTEP_COUNT)
+            doCollisions()
         }
-        doCollisions()
-        for (ent in entities) async { ent.update() }
     }
 
     private suspend fun doCollisionsOld() = coroutineScope {
@@ -72,15 +73,20 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         if (lastStepCountTime + 1000 <= System.currentTimeMillis()) {
             lastStepCountTime = System.currentTimeMillis()
             stepRate = curStepCount
+            println(stepRate)
             curStepCount = 0
         }
         curStepCount++
         update()
-        val message = FullUpdateMessage(this@Game)
+        val message = if (incTickCounter >= Conf.FULL_UPDATE_RATE) {
+            incTickCounter = 0
+            FullUpdateMessage(this@Game)
+        } else IncrementalUpdateMessage(this@Game)
+        incTickCounter++
         server.broadcast(tag, message)
     }
 
-    private fun loop() {
+    private fun loop() { //TODO: jump causes lag
         val thread = Thread {
             var lastUpdate: Long
             while (isRunning) {
