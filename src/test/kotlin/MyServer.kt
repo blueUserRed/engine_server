@@ -1,16 +1,21 @@
-import game.Color
-import game.Conf
-import game.Game
-import game.PolyColorRenderInfo
+import game.*
+import game.entities.CircleEntity
 import game.entities.Player
 import game.entities.PolygonEntity
+import onjParser.OnjParser
 import utils.Vector2D
+import java.nio.file.Files
+import java.nio.file.Paths
 
 object MyServer : Server(3333) {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        launch()
+//        OnjParser.printTokens("res/test.onj")
+        val writer = Files.newBufferedWriter(Paths.get("res/testWrite.json"))
+        OnjParser.parse("res/test.onj").writeJson(writer)
+        writer.close()
+//        launch()
     }
 
     override fun initialize() {
@@ -32,10 +37,12 @@ object MyServer : Server(3333) {
             for (i in 0..6) {
                 val box = PolygonEntity(Vector2D(600, i * 200), 50.0 + i * 10.0, 50.0, 0.6)
 //                val box = PolygonEntity(Vector2D(i * 40, i * 200), 50.0 + i * 10.0, 50.0, 0.6)
+//                val box = CircleEntity(Vector2D(i * 20, i * 200), i * 10.0, 0.6)
                 box.restitution = 0.1
                 box.staticFriction = 0.06
                 box.dynamicFriction = 0.05
                 box.renderInformation = PolyColorRenderInfo()
+//                box.renderInformation = CircleColorRenderInfo()
                 game.addEntity(box)
                 box.addBehavior(gravityBehavior)
                 box.addBehavior(frictionBehaviour)

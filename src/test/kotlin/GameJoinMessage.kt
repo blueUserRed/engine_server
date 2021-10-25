@@ -1,4 +1,5 @@
 import game.*
+import game.entities.CircleEntity
 import game.entities.PolygonEntity
 import networking.ClientConnection
 import networking.Message
@@ -27,6 +28,7 @@ class GameJoinMessage : Message() {
 
     private fun addPlayer(game: Game, con: ClientConnection) {
         val playerEntity = PolygonEntity(Vector2D(200.0, 500.0), 100.0, 100.0, 1.0)
+//        val playerEntity = CircleEntity(Vector2D(200.0, 500.0), 50.0, 1.0)
         val gravityBehavior = GravityBehavior(0.1)
         val frictionBehaviour = FrictionBehaviour(0.0, 0.04)
         val player = MyPlayer()
@@ -34,11 +36,11 @@ class GameJoinMessage : Message() {
         playerEntity.addBehavior(MyPlayerMovementBehavior(player,900.0, 80000.0))
         playerEntity.addBehavior(gravityBehavior)
         playerEntity.addBehavior(frictionBehaviour)
-        playerEntity.renderInformation = PolyImageRenderInfo(Vector2D(-50, 50), 100.0, 100.0, "cobble")
+//        playerEntity.renderInformation = CircleColorRenderInfo()
         playerEntity.staticFriction = 0.06
         playerEntity.dynamicFriction = 0.05
-//        playerEntity.renderInformation = PolyColorRenderInfo()
-//        (playerEntity.renderInformation as PolyColorRenderInfo).color = Color.valueOf("#ff00ff")
+        playerEntity.renderInformation = PolyColorRenderInfo()
+        (playerEntity.renderInformation as PolyColorRenderInfo).color = Color.valueOf("#ff00ff")
         game.addPlayer(player, con, playerEntity)
     }
 

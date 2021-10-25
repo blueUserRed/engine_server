@@ -83,7 +83,9 @@ abstract class Server(val port: Int) : MessageReceiver {
             for (con in connections) con.send(message)
             return
         }
-        for (con in connections) if (con.tag == tag) con.send(message)
+        try {
+            for (con in connections) if (con.tag == tag) con.send(message)
+        } catch (e: ConcurrentModificationException) { }
     }
 
     fun removeGameInitializer(initializer: GameInitializer) {

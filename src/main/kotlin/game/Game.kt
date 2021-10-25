@@ -6,7 +6,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import networking.*
-import utils.Stopwatch
 
 class Game(val tag: Int, val server: Server) : MessageReceiver {
 
@@ -44,27 +43,11 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         }
     }
 
-    private suspend fun doCollisionsOld() = coroutineScope {
-        val colChecker = collisionChecker
-        val colResolver = collisionResolver
-        for (i in 0 until entities.size) {
-            if (entities[i] !is PolygonEntity) continue
-            for (j in (i + 1) until entities.size) {
-                if (entities[j] !is PolygonEntity) continue
-                async {
-                    val result = colChecker.checkPolygonCollision(entities[i] as PolygonEntity, entities[j] as PolygonEntity)
-                        ?: return@async
-                    colResolver.resolveCollision(result)
-                }
-            }
-        }
-    }
-
     private suspend fun doCollisions() = coroutineScope {
         val candidates = broadCollisionChecker.getCollisionCandidates(entities)
         for (candidatePair in candidates) async {
             val result =
-                collisionChecker.checkPolygonCollision(candidatePair.first, candidatePair.second) ?: return@async
+                collisionChecker.checkCollision(candidatePair.first, candidatePair.second) ?: return@async
             collisionResolver.resolveCollision(result)
         }
     }
@@ -112,6 +95,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         player.entity = ent
         con.player = player
         con.tag = tag
+        player.clientConnection = con
         players.add(Pair(player, con))
         if (ent == null) return
         ent.player = player

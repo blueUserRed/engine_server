@@ -11,8 +11,8 @@ import java.net.Socket
 class ClientConnection(private val socket: Socket, private val server: Server, var tag: Int) : Thread() {
 
     private var stop: Boolean = false
-    private val input: DataInputStream = DataInputStream(socket.getInputStream())
-    private val output: DataOutputStream = DataOutputStream(socket.getOutputStream())
+    val input: DataInputStream = DataInputStream(socket.getInputStream())
+    val output: DataOutputStream = DataOutputStream(socket.getOutputStream())
 
     var player: Player? = null
         internal set

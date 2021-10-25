@@ -50,6 +50,11 @@ abstract class Entity(position: Vector2D) {
     var isMarkedForRemoval: Boolean = false
         private set
 
+    protected val contacts: MutableList<Entity> = mutableListOf()
+
+    internal val contactsAccessor: MutableList<Entity> //TODO: theres probably a better way to do this
+        get() = contacts
+
     abstract val identifier: Int
 
     abstract val aabb: AABB
@@ -85,16 +90,6 @@ abstract class Entity(position: Vector2D) {
     inline fun <reified T> getBehavior(): T? {
         for (behavior in `access$behaviors`) if (behavior is T) return behavior
         return null
-    }
-
-    fun <T> getBehaviorJava(clazz: Class<T>): T? { //java cant do inline functions
-        @Suppress("UNCHECKED_CAST")
-        for (behavior in behaviors) if (clazz.isInstance(behavior)) return behavior as T
-        return null
-    }
-
-    fun <T> removeBehaviorJava(clazz: Class<T>) {
-        for (behavior in behaviors) if (clazz.isInstance(behavior)) behaviors.remove(behavior)
     }
 
     fun translate(translation: Vector2D) {

@@ -53,6 +53,7 @@ open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, density:
     override fun serialize(output: DataOutputStream) {
         output.writeLong(uuid.mostSignificantBits)
         output.writeLong(uuid.leastSignificantBits)
+        output.writeBoolean(output === player?.clientConnection?.output) //TODO: do better
         output.writeInt(verticesRelative.size)
         for (vert in verticesRelative) vert.serialize(output)
         position.serialize(output)

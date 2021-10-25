@@ -93,6 +93,7 @@ object Utils {
     fun compareDouble(d1: Double, d2: Double, epsilon: Double = 0.01): Boolean {
         return abs(d1 - d2) < epsilon
     }
+
 }
 
 internal class ThisShouldNeverBeThrownException : RuntimeException()
@@ -120,6 +121,16 @@ fun Long.toByteArray(): Array<Byte> {
     return buffer
 }
 
+fun Double.toDeg() = this * 57.2958
+
+fun Double.toRad() = this / 57.2958
+
 fun Double.compare(other: Double, epsilon: Double = 0.01): Boolean {
     return Utils.compareDouble(this, other, epsilon)
 }
+
+fun Char.isHexadecimal(): Boolean {
+    return this.code in 48..57 || this.code in 65..70 || this.code in 97..102
+}
+
+operator fun StringBuilder.plusAssign(other: String): Unit = run { this.append(other) }

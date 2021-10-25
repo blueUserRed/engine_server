@@ -64,5 +64,22 @@ class PolyImageRenderInfo(
         return other is PolyImageRenderInfo && other.offset == this.offset && other.width.compare(this.width) &&
                 other.height.compare(this.height) && other.imgIdentifier == this.imgIdentifier
     }
+}
+
+class CircleColorRenderInfo : RenderInformation() {
+
+    override val identifier: Int = Int.MAX_VALUE - 3
+
+    var color: Color = Color.valueOf("#ffff00")
+
+    override fun serialize(output: DataOutputStream) {
+        output.writeDouble(color.red)
+        output.writeDouble(color.green)
+        output.writeDouble(color.blue)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is CircleColorRenderInfo && other.color == this.color
+    }
 
 }

@@ -1,0 +1,17 @@
+!blue = #0000ff
+!someObject = {
+    number: 18
+    string: "Hi"
+}
+
+position: vec2(1.0, 2.0)
+object: !someObject
+boolean: true
+array: [
+    !someObject
+    vec2(1, 1)
+    !blue
+    {
+        hello: "world!"
+    }
+]

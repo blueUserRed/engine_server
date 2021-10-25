@@ -16,6 +16,10 @@ class MainCollisionResolver : CollisionResolver {
     override fun resolveCollision(information: CollisionInformation) {
         val ent1 = information.ent1
         val ent2 = information.ent2
+
+        ent1.contactsAccessor.add(ent2)
+        ent2.contactsAccessor.add(ent1)
+
         val mtv = information.mtv
         val normal = information.mtv.unit * -1.0
         val colPoint = information.colPoint ?: return
