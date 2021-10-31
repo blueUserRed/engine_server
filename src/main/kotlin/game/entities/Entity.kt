@@ -1,7 +1,7 @@
 package game.entities
 
 import EntityBehavior
-import game.AABB
+import game.physics.AABB
 import game.EmptyRenderInfo
 import game.RenderInformation
 import game.entities.shadow.EntityShadow

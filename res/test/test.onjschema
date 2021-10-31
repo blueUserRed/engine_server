@@ -1,0 +1,8 @@
+!entity = {
+    position: vec2
+    renderer: {
+        type: string
+    }
+}
+
+entities: entity[*]

@@ -11,11 +11,11 @@ object MyServer : Server(3333) {
 
     @JvmStatic
     fun main(args: Array<String>) {
-//        OnjParser.printTokens("res/test.onj")
-        val writer = Files.newBufferedWriter(Paths.get("res/testWrite.json"))
-        OnjParser.parse("res/test.onj").writeJson(writer)
-        writer.close()
-//        launch()
+//        OnjParser.printTokens("res/test/test.onj")
+//        val writer = Files.newBufferedWriter(Paths.get("res/test/testWrite.json"))
+//        OnjParser.parse("res/test/test.onj").writeJson(writer)
+//        writer.close()
+        launch()
     }
 
     override fun initialize() {
@@ -46,6 +46,16 @@ object MyServer : Server(3333) {
                 game.addEntity(box)
                 box.addBehavior(gravityBehavior)
                 box.addBehavior(frictionBehaviour)
+            }
+            game.inSteps(Conf.TARGET_STEP_RATE * 10) {
+                println("writing...")
+                val serializer = FullStateLevelSerializer()
+                val writer = Files.newBufferedWriter(Paths.get("res/level/testSerialize.onj"))
+                writer.write("?= 'res/level/level.onjschema'")
+                writer.newLine()
+                writer.newLine()
+                serializer.serialize(game).write(writer)
+                writer.close()
             }
         }
         Conf.logger.info("Server started on Port ${this.port}")

@@ -3,11 +3,13 @@ package onjParser
 import game.Color
 import utils.Vector2D
 import java.io.BufferedWriter
+import java.lang.RuntimeException
 
 abstract class OnjValue {
 
     fun isInt(): Boolean = this is OnjInt
     fun isVec2(): Boolean = this is OnjVec2
+    fun isNull(): Boolean = this is OnjNull
     fun isColor(): Boolean = this is OnjColor
     fun isFloat(): Boolean = this is OnjFloat
     fun isString(): Boolean = this is OnjString
@@ -41,7 +43,10 @@ class OnjFloat(val value: Float) : OnjValue() {
     }
 
     override fun write(writer: BufferedWriter, indentationLevel: Int) {
-        writer.write("$value")
+        if (value == Float.POSITIVE_INFINITY) writer.write("Pos_Infinity")
+        else if (value == Float.NEGATIVE_INFINITY) writer.write("Neg_Infinity")
+        else if (value.isNaN()) writer.write(("NaN"))
+        else writer.write("$value")
     }
 
     override fun writeJson(writer: BufferedWriter, indentationLevel: Int) = write(writer, indentationLevel)
@@ -105,6 +110,18 @@ class OnjVec2(val value: Vector2D) : OnjValue() {
     }
 }
 
+class OnjNull : OnjValue() {
+
+    override fun write(writer: BufferedWriter) {
+    }
+
+    override fun write(writer: BufferedWriter, indentationLevel: Int) {
+        writer.write("null")
+    }
+
+    override fun writeJson(writer: BufferedWriter, indentationLevel: Int) = write(writer, indentationLevel)
+}
+
 class OnjObject(val value: Map<String, OnjValue>) : OnjValue() {
 
     override fun write(writer: BufferedWriter) {
@@ -143,6 +160,8 @@ class OnjObject(val value: Map<String, OnjValue>) : OnjValue() {
         writer.write("}")
     }
 
+   operator fun get(identifier: String) = value[identifier]
+
 }
 
 class OnjArray(val value: List<OnjValue>) : OnjValue() {
@@ -180,9 +199,9 @@ class OnjArray(val value: List<OnjValue>) : OnjValue() {
             writer.write("[ ")
             for (i in value.indices) {
                 value[i].writeJson(writer, indentationLevel + 1)
-                if (i != value.size) writer.write(", ")
+                if (i != value.size - 1) writer.write(", ")
             }
-            writer.write("]")
+            writer.write(" ]")
             return
         }
 
@@ -204,12 +223,12 @@ class OnjArray(val value: List<OnjValue>) : OnjValue() {
         for (part in value) {
             if (part.isOnjArray() || part.isOnjObject()) return false
             else if (part.isBoolean()) cost += 5
-            else if (part.isInt() || part.isFloat()) cost += 2
+            else if (part.isInt() || part.isFloat()) cost += 4
             else if (part.isString()) cost += (part as OnjString).value.length
             else if (part.isColor()) cost += 10
             else if (part.isVec2()) cost += 30
+            else if (part.isNull()) cost += 4
         }
         return cost < 60
     }
-
 }

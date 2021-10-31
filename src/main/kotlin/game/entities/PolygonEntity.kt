@@ -1,11 +1,14 @@
 package game.entities
 
-import game.AABB
+import game.FullStateLevelSerializable
+import game.physics.AABB
+import onjParser.*
 import utils.Utils
 import utils.Vector2D
 import java.io.DataOutputStream
 
-open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, density: Double) : Entity(position) {
+open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, val density: Double) :
+    Entity(position), FullStateLevelSerializable {
 
     final override val aabb: AABB
 
@@ -66,6 +69,25 @@ open class PolygonEntity(position: Vector2D, vertices: Array<Vector2D>, density:
         var max = Vector2D()
         for (vert in verts) if (vert.mag > max.mag) max = vert
         return AABB(max.mag * 2, max.mag * 2)
+    }
+
+    override fun serializeLevel(): OnjObject {
+        val values = mutableMapOf(
+            "position" to OnjVec2(position),
+            "rotation" to OnjFloat(rotation.toFloat()),
+            "density" to OnjFloat(density.toFloat()),
+            "restitution" to OnjFloat(restitution.toFloat()),
+            "staticFriction" to OnjFloat(staticFriction.toFloat()),
+            "dynamicFriction" to OnjFloat(dynamicFriction.toFloat())
+        )
+
+        val onjVerts = List<OnjValue>(verticesRelative.size) { OnjVec2(verticesRelative[it]) }
+        values["vertices"] = OnjArray(onjVerts)
+
+        if (renderInformation !is FullStateLevelSerializable) values["renderer"] = OnjNull()
+        else values["renderer"] = (renderInformation as FullStateLevelSerializable).serializeLevel()
+
+        return OnjObject(values)
     }
 
 }

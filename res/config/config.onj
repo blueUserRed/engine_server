@@ -1,0 +1,12 @@
+?= "res/test.onjschema"
+
+physics: {
+    targetStepRate: 60
+    targetStepTime: 16.6666666666666
+    substepCount: 6
+    fullUpdateRate: 60
+}
+output: {
+    consoleOutput: true
+    fileOutput: null
+}

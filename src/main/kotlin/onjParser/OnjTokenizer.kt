@@ -39,6 +39,9 @@ class OnjTokenizer {
             ',' -> OnjToken(OnjTokenType.COMMA, null, next - 1)
             '!' -> OnjToken(OnjTokenType.EXCLAMATION, null, next - 1)
             '=' -> OnjToken(OnjTokenType.EQUALS, null, next - 1)
+            '?' -> OnjToken(OnjTokenType.QUESTION, null, next - 1)
+            '*' -> OnjToken(OnjTokenType.STAR, null, next - 1)
+            '.' -> OnjToken(OnjTokenType.DOT, null, next - 1)
             '"' -> getString('"')
             '\'' -> getString('\'')
             '#' -> getColor()
@@ -47,7 +50,7 @@ class OnjTokenizer {
             else -> {
                 next -= 1
                 if (code[next].isLetter()) getIdentifier()
-                else if (code[next].isDigit()) getNumber()
+                else if (code[next].isDigit() || code[next] == '-') getNumber()
                 else if (code[next] == '/') { comment() ; null }
                 else throw OnjParserException.fromErrorMessage(next, code, "Illegal Character '${code[next]}'.", filename)
             }
@@ -126,18 +129,27 @@ class OnjTokenizer {
 
     private fun getIdentifier(): OnjToken {
         start = next
-        while (!end() && code[next].isLetterOrDigit()) next++
+        while (!end() && (code[next].isLetterOrDigit() || code[next] == '_')) next++
         val identifier = code.substring(start, next)
         return when(identifier.uppercase()) {
             "TRUE" -> OnjToken(OnjTokenType.BOOLEAN, true, start)
             "FALSE" -> OnjToken(OnjTokenType.BOOLEAN, false, start)
             "VEC2" -> OnjToken(OnjTokenType.VEC2, null, start)
+            "NULL" -> OnjToken(OnjTokenType.NULL, null, start)
+            "POS_INFINITY" -> OnjToken(OnjTokenType.FLOAT, Float.POSITIVE_INFINITY, start)
+            "NEG_INFINITY" -> OnjToken(OnjTokenType.FLOAT, Float.NEGATIVE_INFINITY, start)
+            "NAN" -> OnjToken(OnjTokenType.FLOAT, Float.NaN, start)
             else -> OnjToken(OnjTokenType.IDENTIFIER, identifier, start)
         }
     }
 
     private fun getNumber(): OnjToken {
         start = next
+
+        val negative = if (code[next] == '-') {
+            next++
+            true
+        } else false
 
         var radix = 10
         if (code[next] == '0') {
@@ -158,12 +170,14 @@ class OnjTokenizer {
                 num += code[next - 1].digitToInt(radix)
             } catch (e: NumberFormatException) {
                 next--
-                return OnjToken(OnjTokenType.INT, num / radix, start)
+                val decNum = num / radix
+                return OnjToken(OnjTokenType.INT, if (negative) -decNum else decNum, start)
             }
         }
 
-        if (!end()) next--
-        if (end() || radix != 10 || code[next] != '.') return OnjToken(OnjTokenType.INT, num, start)
+        next--
+        if (end() || radix != 10 || code[next] != '.') return OnjToken(OnjTokenType.INT,
+            if (negative) -num else num, start)
         next++
 
         var afterComma = 0.0
@@ -173,7 +187,8 @@ class OnjTokenizer {
             numIts++
             next++
         }
-        return OnjToken(OnjTokenType.FLOAT, (num + afterComma).toFloat(), start)
+        val commaNum = (num + afterComma).toFloat()
+        return OnjToken(OnjTokenType.FLOAT, if (negative) -commaNum else commaNum, start)
     }
 
     private fun end(): Boolean = next == code.length
@@ -194,8 +209,8 @@ data class OnjToken(val type: OnjTokenType, val literal: Any?, val char: Int) {
 
 enum class OnjTokenType {
     L_BRACE, R_BRACE, L_PAREN, R_PAREN, L_BRACKET, R_BRACKET,
-    COMMA, COLON, EQUALS, EXCLAMATION,
-    IDENTIFIER, STRING, INT, FLOAT, BOOLEAN, COLOR,
+    COMMA, COLON, EQUALS, EXCLAMATION, QUESTION, STAR, DOT,
+    IDENTIFIER, STRING, INT, FLOAT, BOOLEAN, COLOR, NULL,
     VEC2,
     EOF
 }

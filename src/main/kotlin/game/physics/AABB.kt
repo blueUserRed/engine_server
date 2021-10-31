@@ -1,4 +1,4 @@
-package game
+package game.physics
 
 import utils.Vector2D
 import kotlin.math.abs

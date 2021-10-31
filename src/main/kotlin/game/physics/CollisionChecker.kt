@@ -1,5 +1,3 @@
-package game
-
 import game.entities.CircleEntity
 import game.entities.Entity
 import game.entities.PolygonEntity

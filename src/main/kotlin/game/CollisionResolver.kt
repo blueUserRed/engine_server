@@ -1,5 +1,6 @@
 package game
 
+import CollisionInformation
 import utils.cross
 import kotlin.math.abs
 import kotlin.math.min

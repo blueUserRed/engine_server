@@ -1,10 +1,14 @@
 package game
 
+import onjParser.OnjColor
+import onjParser.OnjFloat
+import onjParser.OnjObject
+import onjParser.OnjString
 import utils.Vector2D
 import utils.compare
 import java.io.DataOutputStream
 
-abstract class RenderInformation{
+abstract class RenderInformation : FullStateLevelSerializable {
 
     abstract val identifier: Int
 
@@ -25,6 +29,9 @@ class EmptyRenderInfo : RenderInformation()  {
         return other is EmptyRenderInfo
     }
 
+    override fun serializeLevel(): OnjObject {
+        return OnjObject(mapOf("type" to OnjString("EmptyRenderer")))
+    }
 }
 
 class PolyColorRenderInfo : RenderInformation() {
@@ -41,6 +48,13 @@ class PolyColorRenderInfo : RenderInformation() {
 
     override fun equals(other: Any?): Boolean {
         return other is PolyColorRenderInfo && other.color == color
+    }
+
+    override fun serializeLevel(): OnjObject {
+        return OnjObject(mapOf(
+            "type" to OnjString("PolyColorRenderInfo"),
+            "color" to OnjColor(color)
+        ))
     }
 }
 
@@ -64,22 +78,32 @@ class PolyImageRenderInfo(
         return other is PolyImageRenderInfo && other.offset == this.offset && other.width.compare(this.width) &&
                 other.height.compare(this.height) && other.imgIdentifier == this.imgIdentifier
     }
-}
 
-class CircleColorRenderInfo : RenderInformation() {
-
-    override val identifier: Int = Int.MAX_VALUE - 3
-
-    var color: Color = Color.valueOf("#ffff00")
-
-    override fun serialize(output: DataOutputStream) {
-        output.writeDouble(color.red)
-        output.writeDouble(color.green)
-        output.writeDouble(color.blue)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return other is CircleColorRenderInfo && other.color == this.color
+    override fun serializeLevel(): OnjObject {
+        return OnjObject(mapOf(
+            "type" to OnjString("PolyColorRenderInfo"),
+            "width" to OnjFloat(width.toFloat()),
+            "height" to OnjFloat(height.toFloat()),
+            "imgIdentifier" to OnjString(imgIdentifier)
+        ))
     }
 
 }
+//
+//class CircleColorRenderInfo : RenderInformation() {
+//
+//    override val identifier: Int = Int.MAX_VALUE - 3
+//
+//    var color: Color = Color.valueOf("#ffff00")
+//
+//    override fun serialize(output: DataOutputStream) {
+//        output.writeDouble(color.red)
+//        output.writeDouble(color.green)
+//        output.writeDouble(color.blue)
+//    }
+//
+//    override fun equals(other: Any?): Boolean {
+//        return other is CircleColorRenderInfo && other.color == this.color
+//    }
+//
+//}

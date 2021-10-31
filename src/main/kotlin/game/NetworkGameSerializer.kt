@@ -2,12 +2,12 @@ package game
 
 import java.io.DataOutputStream
 
-abstract class GameSerializer {
+abstract class NetworkGameSerializer {
     abstract fun serialize(output: DataOutputStream, game: Game)
     abstract fun serializeIncremental(output: DataOutputStream, game: Game)
 }
 
-class MainGameSerializer : GameSerializer() {
+open class MainNetworkGameSerializer : NetworkGameSerializer() {
 
     override fun serialize(output: DataOutputStream, game: Game) {
         val ents = game.entities

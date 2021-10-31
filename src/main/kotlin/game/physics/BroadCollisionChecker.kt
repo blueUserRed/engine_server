@@ -1,4 +1,4 @@
-package game.entities
+import game.entities.Entity
 
 interface BroadCollisionChecker {
     fun getCollisionCandidates(entities: List<Entity>): List<Pair<Entity, Entity>>

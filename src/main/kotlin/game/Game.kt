@@ -1,5 +1,9 @@
 package game
 
+import BroadCollisionChecker
+import CollisionChecker
+import MainBroadCollisionChecker
+import SatCollisionChecker
 import Server
 import game.entities.*
 import kotlinx.coroutines.async
@@ -26,7 +30,9 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     var collisionChecker: CollisionChecker = SatCollisionChecker()
     var collisionResolver: CollisionResolver = MainCollisionResolver()
     var broadCollisionChecker: BroadCollisionChecker = MainBroadCollisionChecker()
-    var gameSerializer: GameSerializer = MainGameSerializer()
+    var networkGameSerializer: NetworkGameSerializer = MainNetworkGameSerializer()
+
+    private var inStepCallbacks: MutableMap<() -> Unit, Int> = mutableMapOf()
 
     fun start() {
         Conf.logger.info("Game started with tag $tag")
@@ -37,17 +43,17 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         for (ent in entities) ent.updateShadow()
         for (ent in entities) async { ent.update() }
 //        for (ent in entities) ent.update()
-        for (i in 0..Conf.SUBSTEP_COUNT) {
+        for (i in 1..Conf.SUBSTEP_COUNT) {
             for (ent in entities) ent.step(Conf.SUBSTEP_COUNT)
             doCollisions()
         }
+        updateInStepCallbacks()
     }
 
     private suspend fun doCollisions() = coroutineScope {
         val candidates = broadCollisionChecker.getCollisionCandidates(entities)
         for (candidatePair in candidates) async {
-            val result =
-                collisionChecker.checkCollision(candidatePair.first, candidatePair.second) ?: return@async
+            val result = collisionChecker.checkCollision(candidatePair.first, candidatePair.second) ?: return@async
             collisionResolver.resolveCollision(result)
         }
     }
@@ -67,6 +73,18 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         } else IncrementalUpdateMessage(this@Game)
         incTickCounter++
         server.broadcast(tag, message)
+    }
+
+    private fun updateInStepCallbacks() {
+        val toRemove = mutableListOf<() -> Unit>()
+        for (entry in inStepCallbacks.entries) {
+            entry.setValue(entry.value - 1)
+            if (entry.value <= 0) {
+                entry.key()
+                toRemove.add(entry.key)
+            }
+        }
+        for (callback in toRemove) inStepCallbacks.remove(callback)
     }
 
     private fun loop() {
@@ -108,6 +126,10 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
 
     override fun receive(message: Message, con: ClientConnection) {
         message.execute(con, this)
+    }
+
+    fun inSteps(steps: Int, callback: () -> Unit) {
+        inStepCallbacks[callback] = steps
     }
 
 }

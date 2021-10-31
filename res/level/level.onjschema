@@ -1,0 +1,14 @@
+!entity = {
+    position: vec2
+    rotation: float
+    density: float
+    restitution: float
+    staticFriction: float
+    dynamicFriction: float
+    vertices: vec2[*]
+    renderer: ?{
+        renderColor: color
+    }
+}
+
+entities: !entity[*]

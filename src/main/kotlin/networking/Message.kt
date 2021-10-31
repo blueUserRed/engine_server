@@ -56,7 +56,7 @@ class FullUpdateMessage(val game: Game) : Message() {
     }
 
     override fun serialize(output: DataOutputStream) {
-        game.gameSerializer.serialize(output, game)
+        game.networkGameSerializer.serialize(output, game)
     }
 
 }
@@ -70,7 +70,7 @@ class IncrementalUpdateMessage(val game: Game) : Message() {
     }
 
     override fun serialize(output: DataOutputStream) {
-        game.gameSerializer.serializeIncremental(output, game)
+        game.networkGameSerializer.serializeIncremental(output, game)
     }
 }
 

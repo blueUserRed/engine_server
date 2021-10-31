@@ -1,6 +1,6 @@
 package game.entities
 
-import game.AABB
+import game.physics.AABB
 import utils.Vector2D
 import java.io.DataOutputStream
 import kotlin.math.pow
