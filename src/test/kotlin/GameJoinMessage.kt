@@ -1,5 +1,6 @@
 import game.*
-import game.entities.CircleEntity
+import game.entities.FrictionBehaviour
+import game.entities.GravityBehavior
 import game.entities.PolygonEntity
 import networking.ClientConnection
 import networking.Message

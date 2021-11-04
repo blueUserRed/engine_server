@@ -1,8 +1,25 @@
-!entity = {
-    position: vec2
-    renderer: {
-        type: string
+!someObject = {
+    array: int[*]
+    other: {
+        hello: string
+        firstColor: color
+        secondColor: color
     }
 }
 
-entities: entity[*]
+nullableBoolArr: boolean?[*]
+
+test: [
+    int
+    !someObject
+    float?
+    boolean?
+]
+
+objectWithMoreKeys: {
+    newKey: int?[*]?
+    myBool: boolean
+    vertices: vec2?[4]
+    myFloat: float
+    ...!someObject
+}

@@ -101,20 +101,37 @@ class OnjParser {
 
                 val result = doTripleDot()
 
-                if (result !is OnjObject) throw OnjParserException.fromErrorMessage(last().char, code,
-                    "Triple-Dot variable in object is not of type object.", filename)
+                if (!isSchema) {
+                    if (result !is OnjObject) throw OnjParserException.fromErrorMessage(last().char, code,
+                        "Variable included via triple dot is not of type 'Object'", filename)
+                    for (pair in result.value.entries) {
 
-                for (pair in result.value.entries) {
+                        if (values.containsKey(pair.key))
+                            throw OnjParserException.fromErrorMessage(last().char, code,
+                                "Key '${pair.key}' included via Triple-Dot is already defined.", filename)
 
-                    if (values.containsKey(pair.key))
-                        throw OnjParserException.fromErrorMessage(last().char, code,
-                            "Key '${pair.key}' included via Triple-Dot is already defined.", filename)
+                        values[pair.key] = pair.value
 
-                    values[pair.key] = pair.value
+                    }
 
+                    continue
+                } else {
+                    if (result !is OnjSchemaObject) throw OnjParserException.fromErrorMessage(last().char, code,
+                        "Variable included via triple dot is not of type 'Object'", filename)
+
+                    for (pair in result.schema.entries) {
+
+                        if (values.containsKey(pair.key))
+                            throw OnjParserException.fromErrorMessage(last().char, code,
+                                "Key '${pair.key}' included via Triple-Dot is already defined.", filename)
+
+                        values[pair.key] = pair.value
+
+                    }
+
+                    continue
                 }
 
-                continue
             }
             else
                 throw OnjParserException.fromErrorToken(last(), "Identifier or String-Identifier.", code, filename)
@@ -149,7 +166,7 @@ class OnjParser {
 
                 val result = doTripleDot()
 
-                if (result !is OnjArray)
+                if (result !is OnjArray) //TODO: fix like object
                     throw OnjParserException.fromErrorMessage(last().char, code,
                         "Triple-Dot variable in array is not of type array.", filename)
 
@@ -210,11 +227,11 @@ class OnjParser {
             else if (tryConsume(OnjTokenType.L_BRACKET)) parseArray(last(), false).first!!
             else if (tryConsume(OnjTokenType.VEC2)) parseVec2()
             else if (tryConsume(OnjTokenType.EXCLAMATION)) parseVariable()
-            else throw OnjParserException.fromErrorToken(last(), "Value", code, filename)
+            else throw OnjParserException.fromErrorToken(current(), "Value", code, filename)
     }
 
     private fun parseSchemaValue(): OnjSchema {
-        if (tryConsume(OnjTokenType.IDENTIFIER)) {
+        if (tryConsume(OnjTokenType.IDENTIFIER) || tryConsume(OnjTokenType.VEC2)) {
             val type = last()
 
             val isNullable = tryConsume(OnjTokenType.QUESTION)
@@ -233,7 +250,7 @@ class OnjParser {
 
             if (tryConsume(OnjTokenType.L_BRACKET)) {
 
-                val amount = if (tryConsume(OnjTokenType.STAR)) -1
+                val amount = if (tryConsume(OnjTokenType.STAR)) - 1
                     else if (tryConsume(OnjTokenType.INT)) {
                         val res = last().literal as Int
                         if (res < 0) throw OnjParserException.fromErrorMessage(last().char, code,
@@ -270,7 +287,7 @@ class OnjParser {
                 "Expected start of object or array!", filename)
         }
 
-        throw OnjParserException.fromErrorMessage(last().char, code, "Expected type.", filename)
+        throw OnjParserException.fromErrorMessage(current().char, code, "Expected type.", filename)
     }
 
     private fun parseVariable(): OnjValue {
@@ -349,16 +366,18 @@ class OnjParser {
     }
 
     private fun consume(type: OnjTokenType) {
-        if (tokens[next].isType(type)) next++
+        if (current().isType(type)) next++
         else throw OnjParserException.fromErrorToken(tokens[next], type, code, filename)
     }
 
     private fun tryConsume(type: OnjTokenType): Boolean {
-        return if (tokens[next].isType(type)) { next++ ; true }
+        return if (current().isType(type)) { next++ ; true }
         else false
     }
 
     private fun last(): OnjToken = tokens[next - 1]
+
+    private fun current(): OnjToken = tokens[next]
 
     companion object {
 

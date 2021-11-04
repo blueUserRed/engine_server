@@ -7,12 +7,18 @@ import kotlin.math.sin
 
 object Utils {
 
+    /**
+     * finds the average vertex for an array of vertices
+     */
     fun findVertexAverage(vertices: Array<Vector2D>): Vector2D {
         var acc = Vector2D()
         vertices.forEach { acc += it }
         return acc / vertices.size.toDouble()
     }
 
+    /**
+     * calculates the [centroid][https://en.wikipedia.org/wiki/Centroid] of a polygon
+     */
     fun getPolygonCentroid(vertices: Array<Vector2D>): Vector2D {
 
         val n = vertices.size
@@ -36,13 +42,22 @@ object Utils {
         return Vector2D(ans.x / (6 * signedArea), ans.y / (6 * signedArea))
     }
 
+    /**
+     * translates a polygon so that the centroid of the polygon is at the origin of the coordinate-system
+     */
     fun getShapeWithCentroidZero(verts: Array<Vector2D>): Array<Vector2D> {
-        val centroid = Utils.getPolygonCentroid(verts)
+        val centroid = getPolygonCentroid(verts)
         return Array(verts.size) {
             verts[it] - centroid
         }
     }
 
+    /**
+     * rotates a point around a point
+     * @param point the point that should be rotated
+     * @param center the point around which the other should be rotated
+     * @param angle the angle in rad that the point should be rotated by
+     */
     fun rotatePointAroundPoint(point: Vector2D, center: Vector2D, angle: Double): Vector2D {
         var rVector = point
         val s = sin(-angle)
@@ -52,7 +67,10 @@ object Utils {
         return rVector + center
     }
 
-    fun  getPolygonArea(verts: Array<Vector2D>): Double {
+    /**
+     * @return the area of the polygon
+     */
+    fun getPolygonArea(verts: Array<Vector2D>): Double {
         var area = 0.0
 
         var j = verts.size - 1
@@ -64,6 +82,12 @@ object Utils {
         return abs(area / 2.0)
     }
 
+    /**
+     * calculates the mass and the inertia of a polygon
+     * @param verts the polygon
+     * @param density the density of the polygon
+     * @return Pair(mass, inertia)
+     */
     fun calculateMassAndInertia(verts: Array<Vector2D>, density: Double): Pair<Double, Double> {
         var c = Vector2D(0.0, 0.0)
         var area = 0.0
@@ -90,47 +114,45 @@ object Utils {
         return Pair(mass, inertia)
     }
 
+    /**
+     * compares to double with an epsilon
+     * @param d1 the first double
+     * @param d2 the second double
+     * @param epsilon the epsilon that the doubles are allowed to deviate. Default = 0.01
+     */
     fun compareDouble(d1: Double, d2: Double, epsilon: Double = 0.01): Boolean {
         return abs(d1 - d2) < epsilon
     }
 
 }
 
+/**
+ * lÜl
+ */
 internal class ThisShouldNeverBeThrownException : RuntimeException()
-
-fun Int.toByteArray(): Array<Byte> {
-    val buffer = Array<Byte>(4) {0}
-    buffer[0] = (this shr 0).toByte()
-    buffer[1] = (this shr 8).toByte()
-    buffer[2] = (this shr 16).toByte()
-    buffer[3] = (this shr 24).toByte()
-    return buffer
-}
-
-fun Long.toByteArray(): Array<Byte> {
-    val buffer = Array<Byte>(8) {0}
-    buffer[0] = (this shr 0).toByte()
-    buffer[1] = (this shr 8).toByte()
-    buffer[2] = (this shr 16).toByte()
-    buffer[3] = (this shr 24).toByte()
-    buffer[4] = (this shr 32).toByte()
-    buffer[4] = (this shr 40).toByte()
-    buffer[5] = (this shr 48).toByte()
-    buffer[6] = (this shr 56).toByte()
-    buffer[7] = (this shr 64).toByte()
-    return buffer
-}
 
 fun Double.toDeg() = this * 57.2958
 
 fun Double.toRad() = this / 57.2958
 
+/**
+ * compares to double with an epsilon
+ * @receiver the first double
+ * @param other the second double
+ * @param epsilon the epsilon that the doubles are allowed to deviate. Default = 0.01
+ */
 fun Double.compare(other: Double, epsilon: Double = 0.01): Boolean {
     return Utils.compareDouble(this, other, epsilon)
 }
 
+/**
+ * @return true if the char is hexadecimal
+ */
 fun Char.isHexadecimal(): Boolean {
     return this.code in 48..57 || this.code in 65..70 || this.code in 97..102
 }
 
+/**
+ * same as [java.lang.StringBuilder.append]
+ */
 operator fun StringBuilder.plusAssign(other: String): Unit = run { this.append(other) }

@@ -1,9 +1,23 @@
+package game.physics
+
 import game.entities.Entity
 
+/**
+ * the collision-checker used for broad-phase collision checking
+ */
 interface BroadCollisionChecker {
+
+    /**
+     * checks which entities could be colliding
+     * @param entities the list containing all entities
+     * @return a list of entity-pairs that could be colliding
+     */
     fun getCollisionCandidates(entities: List<Entity>): List<Pair<Entity, Entity>>
 }
 
+/**
+ * The default-broad-phase collision checker
+ */
 class MainBroadCollisionChecker : BroadCollisionChecker {
 
     override fun getCollisionCandidates(entities: List<Entity>): List<Pair<Entity, Entity>> {

@@ -1,6 +1,5 @@
 package networking
 
-import Server
 import game.Conf
 import game.Game
 import game.KeyCode
@@ -8,14 +7,34 @@ import utils.ThisShouldNeverBeThrownException
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
+/**
+ * a message that can be sent or received over a network connection
+ */
 abstract class Message {
+
+    /**
+     * an identifier that identifies the message-type uniquely
+     */
     abstract val identifier: String
 
+    /**
+     * this function is called after the server received the message
+     * @param con the connection over which the message was received
+     * @param game the game the client is associated with; null if there is none
+     */
     abstract fun execute(con: ClientConnection, game: Game?)
+
+    /**
+     * serializes the message, so it can be sent over to the client
+     */
     abstract fun serialize(output: DataOutputStream)
 
     companion object {
-        fun registerDeserializers(server: Server) {
+
+        /**
+         * automatically registers the deserializers for the build-in messages
+         */
+        internal fun registerDeserializers(server: Server) {
             server.addMessageDeserializer("HeartBeat") {
                 HeartBeatMessage(it.readBoolean(), it.readUTF())
             }
@@ -31,6 +50,11 @@ abstract class Message {
 
 }
 
+/**
+ * a Heartbeatmessage; if it is received the server will send a response with the same testString
+ * @param isResponse stores if the message is an initial request or a response. This used to decide whether to send
+ * an answer or not
+ */
 class HeartBeatMessage(val isResponse: Boolean, val testString: String) : Message() {
 
     override val identifier: String = "HeartBeat"
@@ -47,6 +71,10 @@ class HeartBeatMessage(val isResponse: Boolean, val testString: String) : Messag
 
 }
 
+/**
+ * sends a message to the client containing a completely serialized game
+ * @param game the game
+ */
 class FullUpdateMessage(val game: Game) : Message() {
 
     override val identifier: String = "fullUpdt"
@@ -61,6 +89,10 @@ class FullUpdateMessage(val game: Game) : Message() {
 
 }
 
+/**
+ * sends a message to the client to update the state of the game
+ * @param game the game
+ */
 class IncrementalUpdateMessage(val game: Game) : Message() {
 
     override val identifier: String = "incUpdt"
@@ -75,6 +107,10 @@ class IncrementalUpdateMessage(val game: Game) : Message() {
 }
 
 
+/**
+ * is sent from the client to the server and contains information from the client, like keyInputs
+ * @param keys the keys on the client-side
+ */
 class ClientInfoMessage(val keys: List<KeyCode>) : Message() {
 
     override val identifier: String = "clInfo"

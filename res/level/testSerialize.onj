@@ -2,6 +2,7 @@
 
 entities: [
     {
+        type: "PolygonEntity"
         position: vec2(500.0, 20.0)
         rotation: 0.0
         density: Pos_Infinity
@@ -16,10 +17,11 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0x00ffffff
+            renderColor: #00ffffff
         }
     }
     {
+        type: "PolygonEntity"
         position: vec2(600.0, -10837.0)
         rotation: 0.0
         density: 0.6
@@ -34,10 +36,11 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0xffff00ff
+            renderColor: #ffff00ff
         }
     }
     {
+        type: "PolygonEntity"
         position: vec2(600.0, 64.82322)
         rotation: 0.0
         density: 0.6
@@ -52,10 +55,11 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0xffff00ff
+            renderColor: #ffff00ff
         }
     }
     {
+        type: "PolygonEntity"
         position: vec2(600.0, 114.674164)
         rotation: 0.0
         density: 0.6
@@ -70,10 +74,11 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0xffff00ff
+            renderColor: #ffff00ff
         }
     }
     {
+        type: "PolygonEntity"
         position: vec2(600.0, 164.55914)
         rotation: 0.0
         density: 0.6
@@ -88,10 +93,11 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0xffff00ff
+            renderColor: #ffff00ff
         }
     }
     {
+        type: "PolygonEntity"
         position: vec2(600.0, 214.48166)
         rotation: 0.0
         density: 0.6
@@ -106,10 +112,11 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0xffff00ff
+            renderColor: #ffff00ff
         }
     }
     {
+        type: "PolygonEntity"
         position: vec2(600.0, 264.44308)
         rotation: 0.0
         density: 0.6
@@ -124,10 +131,11 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0xffff00ff
+            renderColor: #ffff00ff
         }
     }
     {
+        type: "PolygonEntity"
         position: vec2(600.0, 314.44308)
         rotation: 0.0
         density: 0.6
@@ -142,10 +150,11 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0xffff00ff
+            renderColor: #ffff00ff
         }
     }
     {
+        type: "PolygonEntity"
         position: vec2(200.0, 314.94)
         rotation: 0.0
         density: 1.0
@@ -160,7 +169,7 @@ entities: [
         ]
         renderer: {
             type: 'PolyColorRenderInfo'
-            color: 0xff00ffff
+            renderColor: #ff00ffff
         }
     }
 ]

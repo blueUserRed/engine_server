@@ -2,11 +2,29 @@ package game
 
 import java.io.DataOutputStream
 
+/**
+ * this class is responsible for serializing a game-object, so it can be sent to a client
+ */
 abstract class NetworkGameSerializer {
+
+    /**
+     * serializes the game fully using OutputStream
+     * @param output the outputStream
+     * @param game the game that should be serialized
+     */
     abstract fun serialize(output: DataOutputStream, game: Game)
+
+    /**
+     * serializes the game incrementally. Only changes from the last update are sent
+     * @param output the outputStream
+     * @param game the game that should be serialized
+     */
     abstract fun serializeIncremental(output: DataOutputStream, game: Game)
 }
 
+/**
+ * The standard networkSerializer that is used by default
+ */
 open class MainNetworkGameSerializer : NetworkGameSerializer() {
 
     override fun serialize(output: DataOutputStream, game: Game) {

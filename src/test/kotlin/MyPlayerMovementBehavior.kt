@@ -1,5 +1,6 @@
 import game.KeyCode
 import game.entities.Entity
+import game.entities.EntityBehavior
 import game.entities.Player
 import utils.Vector2D
 

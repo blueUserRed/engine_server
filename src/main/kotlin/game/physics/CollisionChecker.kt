@@ -1,3 +1,5 @@
+package game.physics
+
 import game.entities.CircleEntity
 import game.entities.Entity
 import game.entities.PolygonEntity
@@ -6,12 +8,22 @@ import utils.Vector2D
 import kotlin.math.abs
 import kotlin.math.min
 
-
+/**
+ * the collision-checker used for narrow-phase collision checking
+ */
 interface CollisionChecker {
+
+    /**
+     * check whether two entities are colliding
+     * @return information about the collision; null if the entities are not colliding
+     */
     fun checkCollision(ent1: Entity, ent2: Entity): CollisionInformation?
 }
 
-open class SatCollisionChecker : CollisionChecker {
+/**
+ * The Default-Implementation of the [CollisionChecker] using the SAT-Algorithm
+ */
+open class SatCollisionChecker : CollisionChecker { //TODO: circles are broken
 
     override fun checkCollision(ent1: Entity, ent2: Entity): CollisionInformation? {
         return when {
@@ -146,8 +158,17 @@ open class SatCollisionChecker : CollisionChecker {
 
 }
 
-data class CollisionInformation( val ent1: Entity,
-                                 val ent2: Entity,
-                                 val mtv: Vector2D,
-                                 val colPoint: Vector2D?
+/**
+ * stores information about a collision
+ * @param ent1 the first entity
+ * @param ent2 the second entity
+ * @param mtv the minimum translation vector to separate the objects
+ * @param colPoint the approximated point at which the collision happened; null if it can't be found (for example
+ * if the entities are completely overlapping)
+ */
+data class CollisionInformation(
+    val ent1: Entity,
+    val ent2: Entity,
+    val mtv: Vector2D,
+    val colPoint: Vector2D?
 )

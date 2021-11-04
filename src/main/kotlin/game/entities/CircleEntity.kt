@@ -5,6 +5,9 @@ import utils.Vector2D
 import java.io.DataOutputStream
 import kotlin.math.pow
 
+/**
+ * **dosent work lol**
+ */
 class CircleEntity(position: Vector2D, val radius: Double, density: Double) : Entity(position) {
 
     override val identifier: Int = Int.MAX_VALUE - 1

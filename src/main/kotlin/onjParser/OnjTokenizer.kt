@@ -134,7 +134,7 @@ class OnjTokenizer {
         return when(identifier.uppercase()) {
             "TRUE" -> OnjToken(OnjTokenType.BOOLEAN, true, start)
             "FALSE" -> OnjToken(OnjTokenType.BOOLEAN, false, start)
-            "VEC2" -> OnjToken(OnjTokenType.VEC2, null, start)
+            "VEC2" -> OnjToken(OnjTokenType.VEC2, "vec2", start)
             "NULL" -> OnjToken(OnjTokenType.NULL, null, start)
             "POS_INFINITY" -> OnjToken(OnjTokenType.FLOAT, Float.POSITIVE_INFINITY, start)
             "NEG_INFINITY" -> OnjToken(OnjTokenType.FLOAT, Float.NEGATIVE_INFINITY, start)
@@ -158,8 +158,9 @@ class OnjTokenizer {
                 'b' -> 2
                 'o' -> 8
                 'x' -> 16
+                '.' -> { next-- ; 10 }
                 else -> throw OnjParserException.fromErrorMessage(next - 1, code,
-                    "Illegal Character '${code[next - 1]}!'", filename)
+                    "Illegal Character '${code[next - 1]}'", filename)
             }
         }
 
