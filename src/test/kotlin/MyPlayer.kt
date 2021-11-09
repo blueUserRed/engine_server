@@ -1,9 +1,9 @@
 import game.KeyInputController
 import game.entities.Entity
-import game.entities.Player
+import game.entities.IPlayer
 import networking.ClientConnection
 
-class MyPlayer : Player {
+class MyPlayer : IPlayer {
 
     override val keyInputController: KeyInputController = KeyInputController()
 

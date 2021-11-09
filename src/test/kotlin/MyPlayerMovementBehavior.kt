@@ -1,11 +1,11 @@
 import game.KeyCode
 import game.entities.Entity
 import game.entities.EntityBehavior
-import game.entities.Player
+import game.entities.IPlayer
 import utils.Vector2D
 
 class MyPlayerMovementBehavior(
-    private val player: Player,
+    private val player: IPlayer,
     private val speed: Double,
     private val jumpStrength: Double
 ) : EntityBehavior() {

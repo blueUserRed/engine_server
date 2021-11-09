@@ -7,8 +7,6 @@ import onjParser.OnjObject
 import utils.Vector2D
 import java.io.DataOutputStream
 import java.util.*
-import java.util.concurrent.locks.Lock
-import kotlin.test.assertTrue
 
 /**
  * an entity in the game
@@ -42,7 +40,7 @@ abstract class Entity(position: Vector2D) {
     /**
      * if the entity is associated with a player, this variable is set to the player, else null
      */
-    var player: Player? = null
+    var player: IPlayer? = null
 
     /**
      * the mass of the entity

@@ -25,7 +25,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     /**
      * List of all players in the game and their corresponding connections
      */
-    val players: MutableList<Pair<Player, ClientConnection>> = mutableListOf()
+    val players: MutableList<Pair<IPlayer, ClientConnection>> = mutableListOf()
 
     /**
      * the current steprate of the game (how many physics-steps are executed each second)
@@ -153,7 +153,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
      * @param con the connection over which the corresponding client is reachable
      * @param ent the entity that is associated with the player; null if there is no associated entity
      */
-    fun addPlayer(player: Player, con: ClientConnection, ent: Entity?) {
+    fun addPlayer(player: IPlayer, con: ClientConnection, ent: Entity?) {
         player.entity = ent
         con.player = player
         con.tag = tag

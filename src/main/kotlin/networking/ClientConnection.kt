@@ -1,7 +1,7 @@
 package networking
 
 import game.Conf
-import game.entities.Player
+import game.entities.IPlayer
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
@@ -34,7 +34,7 @@ class ClientConnection(private val socket: Socket, private val server: Server, v
     /**
      * the associated player; null if there is no associated player
      */
-    var player: Player? = null
+    var player: IPlayer? = null
         internal set
 
     /**

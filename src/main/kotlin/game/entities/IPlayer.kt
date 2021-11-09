@@ -6,7 +6,7 @@ import networking.ClientConnection
 /**
  * implements a Player
  */
-interface Player {
+interface IPlayer {
 
     /**
      * the associated entity; null if the is no associated entity
