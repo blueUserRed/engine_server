@@ -23,8 +23,17 @@ class MainBroadCollisionChecker : BroadCollisionChecker {
     override fun getCollisionCandidates(entities: List<Entity>): List<Pair<Entity, Entity>> {
         val candidates = mutableListOf<Pair<Entity, Entity>>()
         for (i in entities.indices) {
+
             entities[i].contactsAccessor.clear()
+            if (!entities[i].isCollidable) continue
+
             for (j in (i + 1) until entities.size) {
+
+                if (!entities[j].isCollidable) continue
+                if (entities[i].mass == Double.POSITIVE_INFINITY && entities[j].mass == Double.POSITIVE_INFINITY) continue
+                if (entities[i].lockState == Entity.LockState.FULL_LOCK &&
+                    entities[j].lockState == Entity.LockState.FULL_LOCK) continue
+
                 if (entities[i].aabb.intersects(entities[j].aabb, entities[i].position, entities[j].position)) {
                     candidates.add(Pair(entities[i], entities[j]))
                 }

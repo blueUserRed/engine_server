@@ -103,9 +103,9 @@ object Utils {
             val weight = triangleArea * kInv3
             c += p1 * weight
             c += p2 * weight
-            val intx2 = p1.x * p1.x + p2.x * p1.x + p2.x * p2.x
-            val inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y
-            inert += 0.25f * kInv3 * d * (intx2 + inty2)
+            val x2 = p1.x * p1.x + p2.x * p1.x + p2.x * p2.x
+            val y2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y
+            inert += 0.25f * kInv3 * d * (x2 + y2)
         }
         c *= (1.0f / area)
 
@@ -122,6 +122,24 @@ object Utils {
      */
     fun compareDouble(d1: Double, d2: Double, epsilon: Double = 0.01): Boolean {
         return abs(d1 - d2) < epsilon
+    }
+
+    fun isConvex(verts: List<Vector2D>): Boolean {
+        if (verts.size < 3) return false
+        var res = 0
+        for (i in verts.indices) {
+            val tmp = verts[(i + 1) % verts.size]
+            val v = Vector2D(tmp.x - verts[i].x, tmp.y - verts[i].y)
+            val u = verts[(i + 2) % verts.size]
+
+            if (i == 0) {
+                res = (u.x * v.y - u.y * v.x + v.x * verts[i].y - v.y * verts[i].x).toInt()
+            } else {
+                val newRes = (u.x * v.y - u.y * v.x + v.x * verts[i].y - v.y * verts[i].x).toInt()
+                if ( (newRes > 0 && res < 0) || (newRes < 0 && res > 0) ) return false
+            }
+        }
+        return true
     }
 
 }

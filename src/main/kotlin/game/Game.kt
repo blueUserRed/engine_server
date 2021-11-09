@@ -154,6 +154,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     fun addPlayer(player: Player, con: ClientConnection, ent: Entity?) {
         player.entity = ent
         con.player = player
+        con.tag = tag
         player.clientConnection = con
         players.add(Pair(player, con))
         if (ent == null) return

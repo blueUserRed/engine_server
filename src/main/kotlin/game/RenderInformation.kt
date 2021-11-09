@@ -115,17 +115,24 @@ class PolyColorRenderInfo : RenderInformation() {
      */
     var color: Color = Color.valueOf("#ffff00")
 
+    /**
+     * The displacement of each vertex from the center
+     * //TODO: remove?
+     */
+    var scale: Double = 1.0
+
     override fun serialize(output: DataOutputStream) {
         output.writeDouble(color.red)
         output.writeDouble(color.green)
         output.writeDouble(color.blue)
+        output.writeDouble(scale)
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is PolyColorRenderInfo && other.color == color
+        return other is PolyColorRenderInfo && other.color == color && other.scale == scale
     }
 
-    override fun serializeToOnj(): OnjObject {
+    override fun serializeToOnj(): OnjObject { //TODO: update or remove
         return OnjObject(mapOf(
             "type" to OnjString("PolyColorRenderInfo"),
             "renderColor" to OnjColor(color)

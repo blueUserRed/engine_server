@@ -7,6 +7,8 @@ import onjParser.OnjObject
 import utils.Vector2D
 import java.io.DataOutputStream
 import java.util.*
+import java.util.concurrent.locks.Lock
+import kotlin.test.assertTrue
 
 /**
  * an entity in the game
@@ -97,7 +99,18 @@ abstract class Entity(position: Vector2D) {
         private set
 
     /**
+     * if false, nothing can collide with the entity
+     */
+    var isCollidable: Boolean = true
+
+    /**
+     * stores which lock applies to the entity
+     */
+    var lockState: LockState = LockState.NONE
+
+    /**
      * all other entities this entity touched in the last step
+     * //TODO: fix
      */
     protected val contacts: MutableList<Entity> = mutableListOf()
 
@@ -130,9 +143,12 @@ abstract class Entity(position: Vector2D) {
      * @param substeps the amount of substeps calculated each physics-step
      */
     open fun step(substeps: Int) {
-        this.position += this.velocity / substeps.toDouble()
-        this.rotation += this.angularVelocity * 4 / substeps.toDouble()
-        this.rotation = this.rotation % (2 * Math.PI)
+        if (lockState != LockState.FULL_LOCK && lockState != LockState.TRANSLATION_LOCK)
+            this.position += this.velocity / substeps.toDouble()
+        if (lockState != LockState.FULL_LOCK && lockState != LockState.ROTATION_LOCK) {
+            this.rotation += this.angularVelocity * 4 / substeps.toDouble()
+            this.rotation = this.rotation % (2 * Math.PI)
+        }
     }
 
     /**
@@ -250,6 +266,10 @@ abstract class Entity(position: Vector2D) {
      */
     fun markForRemoval() {
         isMarkedForRemoval = true
+    }
+
+    enum class LockState {
+        FULL_LOCK, ROTATION_LOCK, TRANSLATION_LOCK, NONE
     }
 
     companion object {

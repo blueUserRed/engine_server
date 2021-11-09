@@ -14,7 +14,7 @@ import java.net.Socket
  * @param tag the tag is used by the server to know to which game the connection belongs. if tag == 0 the connection
  * belongs to the server
  */
-class ClientConnection(private val socket: Socket, private val server: Server, val tag: Int) : Thread() {
+class ClientConnection(private val socket: Socket, private val server: Server, var tag: Int) : Thread() {
 
     /**
      * true if the connection should stop

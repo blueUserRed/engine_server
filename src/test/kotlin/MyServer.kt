@@ -1,5 +1,10 @@
 import game.*
+import game.entities.FrictionBehaviour
+import game.entities.GravityBehavior
+import game.entities.PolygonEntity
 import networking.Server
+import utils.Utils
+import utils.Vector2D
 
 
 object MyServer : Server(3333) {
@@ -11,6 +16,14 @@ object MyServer : Server(3333) {
 //        OnjParser.parse("res/test/test.onj").writeJson(writer)
 //        writer.close()
         launch()
+//        println(Utils.isConvex(listOf(
+//            Vector2D(),
+//            Vector2D(30, 20),
+//            Vector2D(60, 20),
+//            Vector2D(70, 10),
+//            Vector2D(85, 20),
+//            Vector2D(90, 0)
+//        )))
     }
 
     override fun initialize() {
@@ -19,8 +32,19 @@ object MyServer : Server(3333) {
     }
 
     override fun onStart() {
+//        this.addGameInitializer(
+//            MarchingSquaresRandomWorldGenerator(42042069, 50.0, 50, 50, 0.0005, 0.5)::initializeGame)
+
         this.addGameInitializer(
-            RandomWorldGenerator(42042069, 50.0, 10, 10, 1.0/27, 0.5)::initializeGame)
+            NoiseBasedRandomWorldGenerator(4206969, Vector2D(0, 0), 40.0, 4000.0,
+                500.0, 20.0, arrayOf(
+                    NoiseBasedRandomWorldGenerator.NoiseFunc(0.001, 0.9, 210990),
+                    NoiseBasedRandomWorldGenerator.NoiseFunc(0.0001, 0.9, 4204200),
+                    NoiseBasedRandomWorldGenerator.NoiseFunc(0.007, 0.1, 39278409)
+                ))::initialize
+        )
+
+
 //        this.addGameInitializer { game ->
 //            val floor = PolygonEntity(Vector2D(500, 20), 1000.0, 40.0, Double.POSITIVE_INFINITY)
 //            floor.renderInformation = PolyColorRenderInfo()

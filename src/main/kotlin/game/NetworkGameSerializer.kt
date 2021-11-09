@@ -31,6 +31,7 @@ open class MainNetworkGameSerializer : NetworkGameSerializer() {
         val ents = game.entities
         output.writeInt(ents.size)
         for (ent in ents) {
+            ent.shadow.isNew = false
             output.writeInt(ent.identifier)
             ent.serialize(output)
         }

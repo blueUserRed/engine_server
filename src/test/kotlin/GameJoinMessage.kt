@@ -1,4 +1,5 @@
 import game.*
+import game.entities.Entity
 import game.entities.FrictionBehaviour
 import game.entities.GravityBehavior
 import game.entities.PolygonEntity
@@ -30,10 +31,10 @@ class GameJoinMessage : Message() {
     private fun addPlayer(game: Game, con: ClientConnection) {
         val playerEntity = PolygonEntity(Vector2D(200.0, 500.0), 100.0, 100.0, 1.0)
 //        val playerEntity = CircleEntity(Vector2D(200.0, 500.0), 50.0, 1.0)
-        val gravityBehavior = GravityBehavior(0.1)
+        val gravityBehavior = GravityBehavior(0.25)
         val frictionBehaviour = FrictionBehaviour(0.0, 0.04)
         val player = MyPlayer()
-        playerEntity.restitution = 0.2
+        playerEntity.restitution = 0.9
         playerEntity.addBehavior(MyPlayerMovementBehavior(player,900.0, 80000.0))
         playerEntity.addBehavior(gravityBehavior)
         playerEntity.addBehavior(frictionBehaviour)
@@ -42,6 +43,7 @@ class GameJoinMessage : Message() {
         playerEntity.dynamicFriction = 0.05
         playerEntity.renderInformation = PolyColorRenderInfo()
         (playerEntity.renderInformation as PolyColorRenderInfo).color = Color.valueOf("#ff00ff")
+        playerEntity.lockState = Entity.LockState.ROTATION_LOCK
         game.addPlayer(player, con, playerEntity)
     }
 

@@ -40,6 +40,13 @@ open class PolygonEntity(
     ), density)
 
     /**
+     * constructs a PolygonEntity using the absolute vertices of the polygon
+     * @param absVerts the absolute vertices of the polygon
+     * @param density the density of the material of the entity (sets mass indirectly in combination with area)
+     */
+    constructor(absVerts: Array<Vector2D>, density: Double) : this(Utils.getPolygonCentroid(absVerts), absVerts, density)
+
+    /**
      * the relative vertices of the polygon. The origin of the coordinate system is always the center of the polygon
      */
     val verticesRelative: Array<Vector2D>

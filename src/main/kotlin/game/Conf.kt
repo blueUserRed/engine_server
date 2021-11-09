@@ -10,8 +10,8 @@ object Conf {
 
     const val TARGET_STEP_RATE: Int = 60
     const val TARGET_STEP_TIME: Int = 1000 / TARGET_STEP_RATE
-    const val SUBSTEP_COUNT: Int = 6
-    const val FULL_UPDATE_RATE: Int = 60
+    const val SUBSTEP_COUNT: Int = 3
+    const val FULL_UPDATE_RATE: Int = 120
 
     val logger: Logger = Logger.getLogger("Server")
 
