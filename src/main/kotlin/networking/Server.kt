@@ -27,7 +27,7 @@ abstract class Server(val port: Int) : MessageReceiver {
     /**
      * true if the server should stop
      */
-    private val stop: Boolean = false
+    private var stop: Boolean = false
 
     /**
      * helper-variable used to give each game a unique tag
@@ -158,6 +158,14 @@ abstract class Server(val port: Int) : MessageReceiver {
 
     override fun receive(message: Message, con: ClientConnection) {
         message.execute(con, null)
+    }
+
+    /**
+     * stops the server
+     */
+    fun stop() {
+        this.stop = true
+        for (game in games) game.stop()
     }
 
     /**

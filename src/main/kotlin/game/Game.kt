@@ -61,6 +61,8 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
 
     private var inStepCallbacks: MutableMap<() -> Unit, Int> = mutableMapOf()
 
+    private var onStopCallbacks: MutableList<() -> Unit> = mutableListOf()
+
     /**
      * starts the game
      */
@@ -167,6 +169,21 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
      */
     fun stop() {
         this.isRunning = false
+        for (callback in onStopCallbacks) callback()
+    }
+
+    /**
+     * adds a callback that is called when the game is stopped
+     */
+    fun addOnStopCallback(callback: () -> Unit) {
+        onStopCallbacks.add(callback)
+    }
+
+    /**
+     * removes a callback that was previously added using [addOnStopCallback]
+     */
+    fun removeOnStopCallback(callback: () -> Unit) {
+        onStopCallbacks.remove(callback)
     }
 
     override fun receive(message: Message, con: ClientConnection) {
