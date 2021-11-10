@@ -1,33 +1,6 @@
 ?= "res/test/test.onjschema"
 
-!myNum = 3
-!someObject = {
-    array: [ 2, 5, 4, !myNum, !myNum ]
-    other: {
-        hello: "world"
-        firstColor: ##blue
-        secondColor: #00ff00ff
-    }
-}
-
-nullableBoolArr: [ true false true null false ]
-
-test: [
-    !myNum
-    !someObject
-    null
-    true
-]
-
-objectWithMoreKeys: {
-    newKey: null
-    myBool: true
-    myFloat: Pos_Infinity
-    vertices: [
-        vec2(1, 2)
-        vec2(3, 4)
-        vec2(5.4, 3.1)
-        null
-    ]
-    ...!someObject
-}
+hi: 59.32498329
+test: 3254643
+hiArr: [ 5.5 3749.3424 3.456 ]
+testArr: [ 5 34634 754 34089 234893427 ]

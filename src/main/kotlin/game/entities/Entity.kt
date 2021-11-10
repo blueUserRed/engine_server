@@ -270,54 +270,6 @@ abstract class Entity(position: Vector2D) {
         FULL_LOCK, ROTATION_LOCK, TRANSLATION_LOCK, NONE
     }
 
-    companion object {
-
-        private val entityDeserializers: MutableMap<String, FromOnjEntityDeserializer> = mutableMapOf()
-
-        /**
-         * adds a new deserializer for a specific entity class, that deserializes an instance of the class
-         * from an onjObject.
-         *
-         * _Note: the deserializer for the polygonEntity is added automatically by the
-         * [initFromOnjEntityDeserializers] function. For all additional Classes that extend Entity
-         * a deserializer has to be registered using this function._
-         *
-         * @param type the type that is used to link the deserializer to a class. Should be the class-name
-         * @param entityDeserializer the deserializer for the entity
-         */
-        fun registerFromOnjEntityDeserializer(type: String, entityDeserializer: FromOnjEntityDeserializer) {
-            entityDeserializers[type] = entityDeserializer
-        }
-
-        /**
-         * gets a deserializer for specified type
-         * @param type the type that is used to link the deserializer to a class. Should be the class-name
-         * @return the deserializer; null if no deserializer is registered for the type
-         */
-        fun getFromOnjEntityDeserializer(type: String): FromOnjEntityDeserializer? = entityDeserializers[type]
-
-        /**
-         * deserializes an entity Object from an OnjObject. The OnjObject has to contain a `type: string` key
-         * and additional keys depending on the type
-         * @param obj the onjObject
-         * @return the entity; null if it couldn't be deserialized
-         */
-        fun deserializeFromOnj(obj: OnjObject): Entity? {
-            if (!obj.hasKey<String>("type")) return null
-            val type = (obj["type"]!!.value as String)
-            val deserializer = getFromOnjEntityDeserializer(type) ?: run {
-                Conf.logger.warning("Couldn't deserialize Entity with type '$type' from OnjObject")
-                return null
-            }
-            return deserializer(obj)
-        }
-
-        internal fun initFromOnjEntityDeserializers() {
-            registerFromOnjEntityDeserializer("PolygonEntity", PolygonEntity.Companion::deserializeFromOnj)
-        }
-
-    }
-
     @PublishedApi
     internal var `access$behaviors`: MutableList<EntityBehavior>
         get() = behaviors

@@ -50,8 +50,6 @@ abstract class Server(val port: Int) : MessageReceiver {
     fun launch() {
         initialize()
         Message.registerDeserializers(this)
-        RenderInformation.initFromOnjRenderInformationDeserializers()
-        Entity.initFromOnjEntityDeserializers()
         startListening()
         onStart()
     }

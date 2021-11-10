@@ -1,10 +1,6 @@
 package game.entities
 
-import game.Conf
-import game.RenderInformation
-import game.ToOnjSerializable
 import game.physics.AABB
-import onjParser.*
 import utils.Utils
 import utils.Vector2D
 import java.io.DataOutputStream
@@ -19,7 +15,7 @@ open class PolygonEntity(
     position: Vector2D,
     vertices: Array<Vector2D>,
     val density: Double
-    ) : Entity(position), ToOnjSerializable {
+    ) : Entity(position) {
 
     final override val aabb: AABB
 
@@ -115,67 +111,6 @@ open class PolygonEntity(
         var max = Vector2D()
         for (vert in verts) if (vert.mag > max.mag) max = vert
         return AABB(max.mag * 2, max.mag * 2)
-    }
-
-    override fun serializeToOnj(): OnjObject {
-        val values = mutableMapOf(
-            "type" to OnjString("PolygonEntity"),
-            "position" to OnjVec2(position),
-            "rotation" to OnjFloat(rotation.toFloat()),
-            "density" to OnjFloat(density.toFloat()),
-            "restitution" to OnjFloat(restitution.toFloat()),
-            "staticFriction" to OnjFloat(staticFriction.toFloat()),
-            "dynamicFriction" to OnjFloat(dynamicFriction.toFloat())
-        )
-
-        val onjVerts = List<OnjValue>(verticesRelative.size) { OnjVec2(verticesRelative[it]) }
-        values["vertices"] = OnjArray(onjVerts)
-
-        values["renderer"] = renderInformation.serializeToOnj()
-
-        return OnjObject(values)
-    }
-
-    companion object {
-
-        /**
-         * deserializes a polygonEntity from an OnjObject
-         * @param obj the OnjObject with all relevant keys
-         * @return the polygonEntity; null if it couldn't be deserialized
-         */
-        fun deserializeFromOnj(obj: OnjObject): PolygonEntity? {
-            if (!obj.hasKeys(mapOf(
-                    "position" to Vector2D::class,
-                    "rotation" to Float::class,
-                    "density" to Float::class,
-                    "restitution" to Float::class,
-                    "dynamicFriction" to Float::class,
-                    "staticFriction" to Float::class,
-                    "renderer" to Map::class,
-                    "vertices" to List::class
-            ))) {
-                Conf.logger.warning("Couldn't deserialize PolygonEntity from OnjObject because key(s) are missing" +
-                        " or have the wrong type")
-                return null
-            }
-            val onjVerts = obj.get<OnjArray>("vertices")
-            if (!onjVerts.hasOnlyType<Vector2D>()) {
-                Conf.logger.warning("Couldn't deserialize PolygonEntity from OnjObject because key 'vertices' does" +
-                        "not contain only vec2's")
-                return null
-            }
-            val verts = Array(onjVerts.value.size) { onjVerts.value[it].value as Vector2D }
-            val ent = PolygonEntity(obj.get<Vector2D>("position"), verts, obj.get<Float>("density").toDouble())
-            ent.rotation = obj.get<Float>("rotation").toDouble()
-            ent.restitution = obj.get<Float>("restitution").toDouble()
-            ent.dynamicFriction = obj.get<Float>("dynamicFriction").toDouble()
-            ent.staticFriction = obj.get<Float>("staticFriction").toDouble()
-            ent.renderInformation = RenderInformation.deserializeFromOnj(obj["renderer"] as OnjObject) ?: run {
-                Conf.logger.warning("Couldn't deserialize RenderInformation for PolygonEntity!")
-                return null
-            }
-            return ent
-        }
     }
 
 }

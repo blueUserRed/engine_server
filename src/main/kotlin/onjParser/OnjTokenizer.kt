@@ -164,7 +164,7 @@ class OnjTokenizer {
             }
         }
 
-        var num = 0
+        var num = 0L
         while(!end() && code[next++].isLetterOrDigit()) {
             num *= radix
             try {
@@ -184,11 +184,11 @@ class OnjTokenizer {
         var afterComma = 0.0
         var numIts = 1
         while(!end() && code[next].isDigit()) {
-            afterComma += code[next].digitToInt(10).toFloat() / 10.0.pow(numIts)
+            afterComma += code[next].digitToInt(10) / 10.0.pow(numIts)
             numIts++
             next++
         }
-        val commaNum = (num + afterComma).toFloat()
+        val commaNum = (num + afterComma)
         return OnjToken(OnjTokenType.FLOAT, if (negative) -commaNum else commaNum, start)
     }
 

@@ -26,7 +26,7 @@ abstract class OnjValue {
     abstract fun writeJson(writer: BufferedWriter, indentationLevel: Int = 1)
 }
 
-class OnjInt(override val value: Int) : OnjValue() {
+class OnjInt(override val value: Long) : OnjValue() {
 
     override fun write(writer: BufferedWriter) {
         //TODO: toplevel non-objects
@@ -39,22 +39,22 @@ class OnjInt(override val value: Int) : OnjValue() {
     override fun writeJson(writer: BufferedWriter, indentationLevel: Int) = write(writer, indentationLevel)
 }
 
-class OnjFloat(override val value: Float) : OnjValue() {
+class OnjFloat(override val value: Double) : OnjValue() {
 
     override fun write(writer: BufferedWriter) {
 
     }
 
     override fun write(writer: BufferedWriter, indentationLevel: Int) {
-        if (value == Float.POSITIVE_INFINITY) writer.write("Pos_Infinity")
-        else if (value == Float.NEGATIVE_INFINITY) writer.write("Neg_Infinity")
+        if (value == Double.POSITIVE_INFINITY) writer.write("Pos_Infinity")
+        else if (value == Double.NEGATIVE_INFINITY) writer.write("Neg_Infinity")
         else if (value.isNaN()) writer.write(("NaN"))
         else writer.write("$value")
     }
 
     override fun writeJson(writer: BufferedWriter, indentationLevel: Int) {
-        if (value == Float.POSITIVE_INFINITY) writer.write("Infinity")
-        else if (value == Float.NEGATIVE_INFINITY) writer.write("-Infinity")
+        if (value == Double.POSITIVE_INFINITY) writer.write("Infinity")
+        else if (value == Double.NEGATIVE_INFINITY) writer.write("-Infinity")
         else if (value.isNaN()) writer.write(("NaN"))
         else writer.write("$value")
     }
@@ -110,7 +110,7 @@ class OnjVec2(override val value: Vector2D) : OnjValue() {
     }
 
     override fun write(writer: BufferedWriter, indentationLevel: Int) {
-        writer.write("vec2(${value.x.toFloat()}, ${value.y.toFloat()})")
+        writer.write("vec2(${value.x}, ${value.y})")
     }
 
     override fun writeJson(writer: BufferedWriter, indentationLevel: Int) {

@@ -1,9 +1,5 @@
 package game.entities
 
-import game.ToOnjSerializable
-import onjParser.OnjFloat
-import onjParser.OnjObject
-import onjParser.OnjString
 import utils.Vector2D
 import kotlin.math.abs
 
@@ -23,18 +19,12 @@ abstract class EntityBehavior {
  * applies gravity to an entity
  * @param gravity the strength of the gravity that is applied to the entity
  */
-class GravityBehavior(var gravity: Double) : EntityBehavior(), ToOnjSerializable {
+class GravityBehavior(var gravity: Double) : EntityBehavior() {
 
     override fun update(ent: Entity) {
         ent.applyForce(Vector2D(0.0, -gravity * ent.mass))
     }
 
-    override fun serializeToOnj(): OnjObject {
-        return OnjObject(mapOf(
-            "type" to OnjString("GravityBehavior"),
-            "gravity" to OnjFloat(gravity.toFloat())
-        ))
-    }
 
 }
 
@@ -47,7 +37,7 @@ class GravityBehavior(var gravity: Double) : EntityBehavior(), ToOnjSerializable
 class FrictionBehaviour(
     private val angularFriction: Double,
     private val linearFriction: Double
-    ) : EntityBehavior(), ToOnjSerializable {
+    ) : EntityBehavior() {
 
     override fun update(ent: Entity) {
         val angFriction = abs(angularFriction + ent.angularVelocity * 0.2)
@@ -59,14 +49,6 @@ class FrictionBehaviour(
 //            ent.velocity = ent.velocity.getWithMag(ent.velocity.mag - linearFriction)
 //        else if (ent.velocity.mag < -linearFriction)
 //            ent.velocity = ent.velocity.getWithMag(ent.velocity.mag + linearFriction)
-    }
-
-    override fun serializeToOnj(): OnjObject {
-        return OnjObject(mapOf(
-            "type" to OnjString("FrictionBehavior"),
-            "angularFriction" to OnjFloat(angularFriction.toFloat()),
-            "linearFriction" to OnjFloat(linearFriction.toFloat())
-        ))
     }
 
 }

@@ -3,8 +3,11 @@ import game.entities.FrictionBehaviour
 import game.entities.GravityBehavior
 import game.entities.PolygonEntity
 import networking.Server
+import onjParser.OnjParser
 import utils.Utils
 import utils.Vector2D
+import java.nio.file.Files
+import java.nio.file.Paths
 
 
 object MyServer : Server(3333) {
@@ -12,10 +15,10 @@ object MyServer : Server(3333) {
     @JvmStatic
     fun main(args: Array<String>) {
 //        OnjParser.printTokens("res/test/test.onj")
-//        val writer = Files.newBufferedWriter(Paths.get("res/test/testWrite.json"))
-//        OnjParser.parse("res/test/test.onj").writeJson(writer)
-//        writer.close()
-        launch()
+        val writer = Files.newBufferedWriter(Paths.get("res/test/testWrite.json"))
+        OnjParser.parse("res/test/test.onj").writeJson(writer)
+        writer.close()
+//        launch()
 //        println(Utils.isConvex(listOf(
 //            Vector2D(),
 //            Vector2D(30, 20),

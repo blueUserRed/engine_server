@@ -1,9 +1,6 @@
 package game
 
-import onjParser.OnjColor
-import onjParser.OnjFloat
 import onjParser.OnjObject
-import onjParser.OnjString
 import utils.Vector2D
 import utils.compare
 import java.io.DataOutputStream
@@ -12,7 +9,7 @@ import java.io.DataOutputStream
  * The render-information class contains information about how a specific entity should be rendered. It is sent over a
  * network connection to the client, who then actually renders it. _Corresponding class on Client: Renderer_
  */
-abstract class RenderInformation : ToOnjSerializable {
+abstract class RenderInformation {
 
     /**
      * the identifier that is used when sending the renderInformation over a network-connection to uniquely identify
@@ -26,61 +23,6 @@ abstract class RenderInformation : ToOnjSerializable {
     abstract fun serialize(output: DataOutputStream)
 
     abstract override fun equals(other: Any?): Boolean
-
-    companion object {
-
-        private val renderInformationDeserializers: MutableMap<String, FromOnjRenderInformationDeserializer> = mutableMapOf()
-
-        /**
-         * adds a new deserializer for a specific renderInformation class, that deserializes an instance of the class
-         * from an onjObject.
-         *
-         * _Note: the deserializers for all classes in this file are added automatically by the
-         * [initFromOnjRenderInformationDeserializers] function. For all additional Classes that extend RenderInformation
-         * a deserializer has to be registered using this function._
-         *
-         * @param type the type that is used to link the deserializer to a class. Should be the class-name
-         * @param renderInformationDeserializer the deserializer
-         */
-        fun registerFromOnjRenderInformationDeserializer(type: String, renderInformationDeserializer: FromOnjRenderInformationDeserializer) {
-            renderInformationDeserializers[type] = renderInformationDeserializer
-        }
-
-        /**
-         * gets a deserializer for specified type
-         * @param type the type that is used to link the deserializer to a class. Should be the class-name
-         * @return the deserializer; null if no deserializer is registered for the type
-         */
-        fun getFromOnjRenderInformationDeserializer(type: String): FromOnjRenderInformationDeserializer? =
-            renderInformationDeserializers[type]
-
-        /**
-         * deserializes a RenderInformation Object from an OnjObject. The OnjObject has to contain a `type: string` key
-         * and additional keys depending on the type
-         * @param obj the onjObject
-         * @return the renderInformation; null if it couldn't be deserialized
-         */
-        fun deserializeFromOnj(obj: OnjObject): RenderInformation? {
-            if (!obj.hasKey<String>("type")) return null
-            val type = (obj["type"]!!.value as String)
-            val deserializer = getFromOnjRenderInformationDeserializer(type) ?: return null
-            return deserializer(obj)
-        }
-
-        internal fun initFromOnjRenderInformationDeserializers() {
-            registerFromOnjRenderInformationDeserializer("PolyColorRenderInfo") lambda@ {
-                val renderInfo = PolyColorRenderInfo()
-                if (!it.hasKey<Color>("renderColor")) {
-                    Conf.logger.warning("Couldn't deserialize PolyColorRenderInfo because key " +
-                            "'renderColor' isn't defined or has the wrong type")
-                    return@lambda null
-                }
-                renderInfo.color = (it["renderColor"]!!.value as Color)
-                return@lambda renderInfo
-            }
-        }
-
-    }
 
 }
 
@@ -98,9 +40,6 @@ class EmptyRenderInfo : RenderInformation()  {
         return other is EmptyRenderInfo
     }
 
-    override fun serializeToOnj(): OnjObject {
-        return OnjObject(mapOf("type" to OnjString("EmptyRenderer")))
-    }
 }
 
 /**
@@ -132,12 +71,6 @@ class PolyColorRenderInfo : RenderInformation() {
         return other is PolyColorRenderInfo && other.color == color && other.scale == scale
     }
 
-    override fun serializeToOnj(): OnjObject { //TODO: update or remove
-        return OnjObject(mapOf(
-            "type" to OnjString("PolyColorRenderInfo"),
-            "renderColor" to OnjColor(color)
-        ))
-    }
 }
 
 /**
@@ -167,15 +100,6 @@ class PolyImageRenderInfo(
     override fun equals(other: Any?): Boolean {
         return other is PolyImageRenderInfo && other.offset == this.offset && other.width.compare(this.width) &&
                 other.height.compare(this.height) && other.imgIdentifier == this.imgIdentifier
-    }
-
-    override fun serializeToOnj(): OnjObject {
-        return OnjObject(mapOf(
-            "type" to OnjString("PolyColorRenderInfo"),
-            "width" to OnjFloat(width.toFloat()),
-            "height" to OnjFloat(height.toFloat()),
-            "imgIdentifier" to OnjString(imgIdentifier)
-        ))
     }
 
 }
