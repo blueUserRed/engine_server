@@ -73,7 +73,9 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
 
     private suspend fun update() = coroutineScope {
         for (ent in entities) ent.updateShadow()
-        for (ent in entities) async { ent.update() }
+        try { //TODO: this is stupid
+            for (ent in entities) async { ent.update() }
+        } catch (e: ConcurrentModificationException) { }
 //        for (ent in entities) ent.update()
         for (i in 1..Conf.SUBSTEP_COUNT) {
             for (ent in entities) ent.step(Conf.SUBSTEP_COUNT)
