@@ -176,8 +176,8 @@ class OnjTokenizer {
             }
         }
 
-        next--
-        if (end() || radix != 10 || code[next] != '.') return OnjToken(OnjTokenType.INT,
+//        next--
+        if (end() || radix != 10 || code[next - 1] != '.') return OnjToken(OnjTokenType.INT,
             if (negative) -num else num, start)
         next++
 
