@@ -71,18 +71,16 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         loop()
     }
 
-    private suspend fun update() = coroutineScope {
+    private suspend fun update() = coroutineScope { try { //TODO: this is even more stupid than before
         for (ent in entities) ent.updateShadow()
-        try { //TODO: this is stupid
-            for (ent in entities) async { ent.update() }
-        } catch (e: ConcurrentModificationException) { }
+        for (ent in entities) async { ent.update() }
 //        for (ent in entities) ent.update()
         for (i in 1..Conf.SUBSTEP_COUNT) {
             for (ent in entities) ent.step(Conf.SUBSTEP_COUNT)
             doCollisions()
         }
         updateInStepCallbacks()
-    }
+    } catch (e: ConcurrentModificationException) { } }
 
     private suspend fun doCollisions() = coroutineScope {
         val candidates = broadCollisionChecker.getCollisionCandidates(entities)
