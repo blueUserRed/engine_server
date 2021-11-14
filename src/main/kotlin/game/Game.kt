@@ -72,7 +72,15 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     }
 
     private suspend fun update() = coroutineScope { try { //TODO: this is even more stupid than before
-        for (ent in entities) ent.updateShadow()
+        val entsIt = entities.iterator()
+        while(entsIt.hasNext()) {
+            val ent = entsIt.next()
+            if (ent.isMarkedForRemoval) {
+                entsIt.remove()
+                continue
+            }
+            ent.updateShadow()
+        }
         for (ent in entities) async { ent.update() }
 //        for (ent in entities) ent.update()
         for (i in 1..Conf.SUBSTEP_COUNT) {
