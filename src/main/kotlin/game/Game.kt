@@ -90,6 +90,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
             doCollisions()
         }
         updateInStepCallbacks()
+        for (callback in updateCallbacks) callback()
     } catch (e: ConcurrentModificationException) { } }
 
     private suspend fun doCollisions() = coroutineScope {
@@ -197,7 +198,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     }
 
     /**
-     * adds a callback that is called every time the game is updatet
+     * adds a callback that is called every time the game is updated
      */
     fun addOnUpdateCallback(callback: () -> Unit) {
         updateCallbacks.add(callback)
