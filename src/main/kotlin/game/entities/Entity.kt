@@ -143,10 +143,11 @@ abstract class Entity(position: Vector2D) {
     open fun step(substeps: Int) {
         if (lockState != LockState.FULL_LOCK && lockState != LockState.TRANSLATION_LOCK)
             this.position += this.velocity / substeps.toDouble()
+        else this.velocity = Vector2D()
         if (lockState != LockState.FULL_LOCK && lockState != LockState.ROTATION_LOCK) {
             this.rotation += this.angularVelocity * 4 / substeps.toDouble()
             this.rotation = this.rotation % (2 * Math.PI)
-        }
+        } else this.angularVelocity = 0.0
     }
 
     /**
