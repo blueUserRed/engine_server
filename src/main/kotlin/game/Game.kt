@@ -63,6 +63,8 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
 
     private var onStopCallbacks: MutableList<() -> Unit> = mutableListOf()
 
+    private var updateCallbacks: MutableList<() -> Unit> = mutableListOf()
+
     /**
      * starts the game
      */
@@ -192,6 +194,20 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
      */
     fun removeOnStopCallback(callback: () -> Unit) {
         onStopCallbacks.remove(callback)
+    }
+
+    /**
+     * adds a callback that is called every time the game is updatet
+     */
+    fun addOnUpdateCallback(callback: () -> Unit) {
+        updateCallbacks.add(callback)
+    }
+
+    /**
+     * removes a callback that was previously added using [addOnUpdateCallback]
+     */
+    fun removeOnUpdateCallback(callback: () -> Unit) {
+        updateCallbacks.remove(callback)
     }
 
     override fun receive(message: Message, con: ClientConnection) {
