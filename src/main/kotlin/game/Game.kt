@@ -18,8 +18,22 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
      */
     val entities: MutableList<Entity> = mutableListOf()
 
+    /**
+     * the time at which [curStepCount] was last reset
+     * _Used for counting how many steps happen per second_
+     */
     private var lastStepCountTime: Long = 0
+
+    /**
+     * the current step count
+     * _Used for counting how many steps happen per second_
+     */
     private var curStepCount: Int = 0
+
+    /**
+     * incremented when an incremental update is sent, and reset when a full update is sent
+     * _Used for knowing when to send full updates_
+     */
     private var incTickCounter: Int = 0
 
     /**
@@ -59,10 +73,19 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
      */
     var networkGameSerializer: NetworkGameSerializer = MainNetworkGameSerializer()
 
+    /**
+     * stores all callbacks that are added using the [inSteps] function
+     */
     private var inStepCallbacks: MutableMap<() -> Unit, Int> = mutableMapOf()
 
+    /**
+     * stores all callbacks that are added using the [addOnStopCallback] function
+     */
     private var onStopCallbacks: MutableList<() -> Unit> = mutableListOf()
 
+    /**
+     * stores all callbacks that are added using the [addOnUpdateCallback] function
+     */
     private var updateCallbacks: MutableList<() -> Unit> = mutableListOf()
 
     /**
@@ -73,6 +96,9 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         loop()
     }
 
+    /**
+     * updates entities, does substeps, calls [updateCallbacks] and [updateInStepCallbacks] and [doCollisions]
+     */
     private suspend fun update() = coroutineScope { try { //TODO: this is even more stupid than before
         val entsIt = entities.iterator()
         while(entsIt.hasNext()) {
@@ -93,6 +119,9 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         for (callback in updateCallbacks) callback()
     } catch (e: ConcurrentModificationException) { } }
 
+    /**
+     * checks which entities are intersection and resolves collisions
+     */
     private suspend fun doCollisions() = coroutineScope {
         val candidates = broadCollisionChecker.getCollisionCandidates(entities)
         for (candidatePair in candidates) async {
@@ -101,6 +130,9 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         }
     }
 
+    /**
+     * called every game-tick; calls [update], counts the [stepRate] and sends updates to the clients
+     */
     private fun tick(): Unit = runBlocking {
         if (lastStepCountTime + 1000 <= System.currentTimeMillis()) {
             lastStepCountTime = System.currentTimeMillis()
@@ -118,6 +150,9 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         server.broadcast(tag, message)
     }
 
+    /**
+     * updates [inStepCallbacks]
+     */
     private fun updateInStepCallbacks() {
         val toRemove = mutableListOf<() -> Unit>()
         for (entry in inStepCallbacks.entries) {
@@ -130,6 +165,9 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         for (callback in toRemove) inStepCallbacks.remove(callback)
     }
 
+    /**
+     * starts the game-Loop in a new thread
+     */
     private fun loop() {
         val thread = Thread {
             var lastUpdate: Long

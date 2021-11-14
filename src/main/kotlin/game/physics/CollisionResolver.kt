@@ -49,10 +49,10 @@ class MainCollisionResolver : CollisionResolver {
         val contactVel = rv dot normal
 
         if (ent1.mass != Double.POSITIVE_INFINITY && ent2.mass != Double.POSITIVE_INFINITY) {
-            ent1.position += mtv * 0.5
-            ent2.position += mtv * -0.5
+            ent1.position += mtv * 0.3
+            ent2.position += mtv * -0.3
         } else if (ent1.mass == Double.POSITIVE_INFINITY && ent2.mass != Double.POSITIVE_INFINITY) {
-            ent2.position += mtv * -1.0
+            ent2.position += mtv * -0.6
         } else {
             ent1.position += mtv
 //            ent1.applyForce(mtv.normal * -10.0, ra)
