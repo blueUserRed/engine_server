@@ -18,7 +18,6 @@ abstract class Entity(position: Vector2D) {
      * the position of the entity (center)
      */
     var position: Vector2D = position
-        internal set
 
     /**
      * the rotation of the entity around its center in rad
@@ -29,13 +28,11 @@ abstract class Entity(position: Vector2D) {
      * the current velocity of the entity
      */
     var velocity: Vector2D = Vector2D()
-        internal set
 
     /**
      * the current angular velocity of the entity (how fast it rotates)
      */
     var angularVelocity: Double = 0.0
-        internal set
 
     /**
      * if the entity is associated with a player, this variable is set to the player, else null
