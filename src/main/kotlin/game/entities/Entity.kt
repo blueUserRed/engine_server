@@ -12,13 +12,7 @@ import java.util.*
  * an entity in the game
  * @param position the position of the entity (center)
  */
-abstract class Entity(position: Vector2D) {
-
-    /**
-     * the position of the entity (center)
-     */
-    var position: Vector2D = position
-        internal set
+abstract class Entity(var position: Vector2D) {
 
     /**
      * the rotation of the entity around its center in rad
@@ -29,13 +23,11 @@ abstract class Entity(position: Vector2D) {
      * the current velocity of the entity
      */
     var velocity: Vector2D = Vector2D()
-        internal set
 
     /**
      * the current angular velocity of the entity (how fast it rotates)
      */
     var angularVelocity: Double = 0.0
-        internal set
 
     /**
      * if the entity is associated with a player, this variable is set to the player, else null
@@ -46,7 +38,6 @@ abstract class Entity(position: Vector2D) {
      * the mass of the entity
      */
     var mass: Double = 1.0
-        protected set
 
     /**
      * the coefficient of restitution of the entity. (how bouncy collisions are)
