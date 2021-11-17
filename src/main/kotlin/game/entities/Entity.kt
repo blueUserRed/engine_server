@@ -98,6 +98,12 @@ abstract class Entity(var position: Vector2D) {
     var lockState: LockState = LockState.NONE
 
     /**
+     * The collisionMask of the entity. Each bit of the long value represents a collision layer. Entities only collide
+     * with other entities if they have at least one layer in common
+     */
+    var collisionMask: Long = DEFAULT_COLLMASK_BIT
+
+    /**
      * all other entities this entity touched in the last step
      * //TODO: fix
      */
@@ -268,6 +274,10 @@ abstract class Entity(var position: Vector2D) {
         set(value) {
             behaviors = value
         }
+
+    companion object {
+        const val DEFAULT_COLLMASK_BIT: Long  = 0b01000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000
+    }
 }
 
 typealias FromOnjEntityDeserializer = (OnjObject) -> Entity?
