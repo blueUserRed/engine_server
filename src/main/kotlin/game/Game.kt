@@ -20,18 +20,21 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
 
     /**
      * the time at which [curStepCount] was last reset
+     *
      * _Used for counting how many steps happen per second_
      */
     private var lastStepCountTime: Long = 0
 
     /**
      * the current step count
+     *
      * _Used for counting how many steps happen per second_
      */
     private var curStepCount: Int = 0
 
     /**
      * incremented when an incremental update is sent, and reset when a full update is sent
+     *
      * _Used for knowing when to send full updates_
      */
     private var incTickCounter: Int = 0

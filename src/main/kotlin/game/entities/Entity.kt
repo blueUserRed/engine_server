@@ -43,7 +43,6 @@ abstract class Entity(position: Vector2D) {
      * the mass of the entity
      */
     var mass: Double = 1.0
-        protected set
 
     /**
      * the coefficient of restitution of the entity. (how bouncy collisions are)
@@ -102,6 +101,12 @@ abstract class Entity(position: Vector2D) {
      * stores which lock applies to the entity
      */
     var lockState: LockState = LockState.NONE
+
+    /**
+     * The collisionMask of the entity. Each bit of the long value represents a collision layer. Entities only collide
+     * with other entities if they have at least one layer in common
+     */
+    var collisionMask: Long = DEFAULT_COLLMASK_BIT
 
     /**
      * all other entities this entity touched in the last step
@@ -274,6 +279,10 @@ abstract class Entity(position: Vector2D) {
         set(value) {
             behaviors = value
         }
+
+    companion object {
+        const val DEFAULT_COLLMASK_BIT: Long  = 0b01000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000
+    }
 }
 
 typealias FromOnjEntityDeserializer = (OnjObject) -> Entity?

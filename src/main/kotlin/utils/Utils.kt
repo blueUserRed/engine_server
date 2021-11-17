@@ -174,3 +174,9 @@ fun Char.isHexadecimal(): Boolean {
  * same as [java.lang.StringBuilder.append]
  */
 operator fun StringBuilder.plusAssign(other: String): Unit = run { this.append(other) }
+
+fun max(vararg doubles: Double): Double {
+    var max = -Double.MAX_VALUE
+    for (double in doubles) if (double > max) max = double
+    return max
+}
