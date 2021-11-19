@@ -226,6 +226,19 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     }
 
     /**
+     * removes a player from the game. The connection is left open
+     * @param player the player that should be removed
+     */
+    fun removePlayer(player: IPlayer) {
+        val playerIt = players.iterator()
+        while (playerIt.hasNext()) {
+            val curPlayer = playerIt.next()
+            if (curPlayer.first === player) playerIt.remove()
+        }
+        player.entity?.markForRemoval()
+    }
+
+    /**
      * stops the game
      */
     fun stop() {
