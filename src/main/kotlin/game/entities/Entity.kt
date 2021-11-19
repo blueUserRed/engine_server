@@ -110,9 +110,8 @@ abstract class Entity(position: Vector2D) {
 
     /**
      * all other entities this entity touched in the last step
-     * //TODO: fix
      */
-    protected val contacts: MutableList<Entity> = mutableListOf()
+    protected open val contacts: MutableList<Entity> = mutableListOf()
 
     internal val contactsAccessor: MutableList<Entity> //TODO: theres probably a better way to do this
         get() = contacts

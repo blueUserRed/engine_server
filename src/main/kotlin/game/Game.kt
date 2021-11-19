@@ -129,6 +129,8 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         val candidates = broadCollisionChecker.getCollisionCandidates(entities)
         for (candidatePair in candidates) async {
             val result = collisionChecker.checkCollision(candidatePair.first, candidatePair.second) ?: return@async
+            candidatePair.first.contactsAccessor.add(candidatePair.second)
+            candidatePair.second.contactsAccessor.add(candidatePair.first)
             collisionResolver.resolveCollision(result)
         }
     }
