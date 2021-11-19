@@ -4,6 +4,7 @@ import networking.MessageReceiver
 import game.entities.*
 import game.physics.*
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import networking.*
@@ -112,21 +113,27 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
             }
             ent.updateShadow()
         }
-        for (ent in entities) async { ent.update() }
-//        for (ent in entities) ent.update()
-        for (i in 1..Conf.SUBSTEP_COUNT) {
-            for (ent in entities) ent.step(Conf.SUBSTEP_COUNT)
-            doCollisions()
-        }
+//        for (ent in entities) async { ent.update() }
+
+        val deferreds = Array(entities.size) { async { entities[it].update() } }
+
         updateInStepCallbacks()
         for (callback in updateCallbacks) callback()
+
+        awaitAll(*deferreds)
+
+        for (i in 1..Conf.SUBSTEP_COUNT) {
+            for (ent in entities) ent.step(Conf.SUBSTEP_COUNT)
+            doCollisions(i == 1)
+        }
     } catch (e: ConcurrentModificationException) { } }
 
     /**
      * checks which entities are intersection and resolves collisions
      */
-    private suspend fun doCollisions() = coroutineScope {
+    private suspend fun doCollisions(resetContacts: Boolean) = coroutineScope {
         val candidates = broadCollisionChecker.getCollisionCandidates(entities)
+        if (resetContacts) for (ent in entities) ent.contactsAccessor.clear()
         for (candidatePair in candidates) async {
             val result = collisionChecker.checkCollision(candidatePair.first, candidatePair.second) ?: return@async
             candidatePair.first.contactsAccessor.add(candidatePair.second)
