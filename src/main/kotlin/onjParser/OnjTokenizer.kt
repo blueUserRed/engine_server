@@ -28,7 +28,7 @@ class OnjTokenizer {
     }
 
     private fun getCurrentToken(): OnjToken? {
-        return when(code[next++]) {
+        return when(consume()) {
             '{' -> OnjToken(OnjTokenType.L_BRACE, null, next - 1)
             '}' -> OnjToken(OnjTokenType.R_BRACE, null, next - 1)
             '[' -> OnjToken(OnjTokenType.L_BRACKET, null, next - 1)
@@ -48,28 +48,27 @@ class OnjTokenizer {
             ' ', '\t', '\r', '\n' -> null
 
             else -> {
-                next -= 1
-                if (code[next].isLetter()) getIdentifier()
-                else if (code[next].isDigit() || code[next] == '-') getNumber()
-                else if (code[next] == '/') { comment() ; null }
-                else throw OnjParserException.fromErrorMessage(next, code, "Illegal Character '${code[next]}'.", filename)
+                if (last().isLetter()) getIdentifier()
+                else if (last().isDigit() || code[next] == '-') getNumber()
+                else if (last() == '/') { comment() ; null }
+                else throw OnjParserException.fromErrorMessage(next - 1, code, "Illegal Character '${code[next]}'.", filename)
             }
         }
     }
 
     private fun getColor(): OnjToken {
-        start = next - 1
-        if (code[next] == '#') {
-            next++
-            while (!end() && code[next].isLetter()) next++
-            val name = code.substring(start + 2, next)
+        start = next
+        if (tryConsume('#')) {
+            while (!end() && consume().isLetter());
+            val name = code.substring(start + 1, next)
             try {
+                consume()
                 return OnjToken(OnjTokenType.COLOR, Color.valueOf(name), start)
             } catch (e: IllegalArgumentException) {
                 throw OnjParserException.fromErrorMessage(start, code, "Invalid Color '$name'!", filename)
             }
         }
-        while (!end() && (code[next].isHexadecimal())) next++
+        while (!end() && (consume().isHexadecimal()));
         val name = code.substring(start, next)
         try {
             return OnjToken(OnjTokenType.COLOR, Color.valueOf(name), start)
@@ -81,13 +80,10 @@ class OnjTokenizer {
     private fun getString(endChar: Char): OnjToken {
         start = next
         val result: StringBuilder = StringBuilder()
-        while (code[next] != endChar) {
-            next++
+        while (consume() != endChar) {
             if (end()) throw OnjParserException.fromErrorMessage(start, code, "String is opened but never closed!", filename)
-            next--
-            if (code[next] == '\\') {
-                next++
-                result += when(code[next]) {
+            if (tryConsume('\\')) {
+                result += when(last()) {
                     'n' -> "\n"
                     'r' -> "\r"
                     't' -> "\t"
@@ -95,41 +91,37 @@ class OnjTokenizer {
                     '\'' -> "\'"
                     '\\' -> "\\"
                     else -> throw OnjParserException.fromErrorMessage(next - 1, code,
-                        "Unrecognized Escape-character '${code[next]}'", filename)
+                        "Unrecognized Escape-character '${last()}'", filename)
                 }
-            } else result.append(code[next])
-            next++
+            } else result.append(last())
         }
-        next++
         return OnjToken(OnjTokenType.STRING, result.toString(), start - 1)
     }
 
     private fun comment() {
-        next++
         if (end()) throw OnjParserException.fromErrorMessage(next - 1, code,
             "Illegal Character '${code[next - 1]}!'", filename)
 
-        if (code[next] == '/') while(!end() && code[next++] !in arrayOf('\n', '\r'));
-        else if (code[next] == '*') blockComment()
+        if (tryConsume('/')) while (!end() && code[next++] !in arrayOf('\n', '\r'));
+        else if (tryConsume('*')) blockComment()
         else throw OnjParserException.fromErrorMessage(next - 1, code,
             "Illegal Character '${code[next - 1]}!'", filename)
     }
 
     private fun blockComment() {
         while(!end()) {
-            next++
             if (end()) break
-            if (code[next] != '*') continue
-            next++
+            if (consume() != '*') continue
             if (end()) break
-            if (code[next] == '/') break
+            if (tryConsume('/')) break
         }
-        next++
     }
 
     private fun getIdentifier(): OnjToken {
-        start = next
-        while (!end() && (code[next].isLetterOrDigit() || code[next] == '_')) next++
+        start = next - 1
+        while (!end() && (consume().isLetterOrDigit() || last() == '_'));
+        if (!end()) next--
+//        next--
         val identifier = code.substring(start, next)
         return when(identifier.uppercase()) {
             "TRUE" -> OnjToken(OnjTokenType.BOOLEAN, true, start)
@@ -144,52 +136,54 @@ class OnjTokenizer {
     }
 
     private fun getNumber(): OnjToken {
+        next--
         start = next
 
-        val negative = if (code[next] == '-') {
-            next++
-            true
-        } else false
+        val negative = tryConsume('-')
 
         var radix = 10
-        if (code[next] == '0') {
-            next++
-            radix = when(code[next++]) {
-                'b' -> 2
-                'o' -> 8
-                'x' -> 16
-                '.' -> { next-- ; 10 }
-                else -> throw OnjParserException.fromErrorMessage(next - 1, code,
-                    "Illegal Character '${code[next - 1]}'", filename)
-            }
+        if (tryConsume('0')) {
+            if (tryConsume('b')) radix = 2
+            else if (tryConsume('o')) radix = 8
+            else if (tryConsume('x')) radix = 16
+            else next--
+
         }
 
         var num = 0L
-        while(!end() && code[next++].isLetterOrDigit()) {
+        while(!end() && consume().isLetterOrDigit()) {
             num *= radix
             try {
-                num += code[next - 1].digitToInt(radix)
+                num += last().digitToInt(radix)
             } catch (e: NumberFormatException) {
                 next--
                 val decNum = num / radix
                 return OnjToken(OnjTokenType.INT, if (negative) -decNum else decNum, start)
             }
         }
+        next--
 
-//        next--
-        if (end() || radix != 10 || code[next - 1] != '.') return OnjToken(OnjTokenType.INT,
+        if (end() || radix != 10 || !tryConsume('.'))  return OnjToken(OnjTokenType.INT,
             if (negative) -num else num, start)
-        next++
 
         var afterComma = 0.0
         var numIts = 1
-        while(!end() && code[next].isDigit()) {
-            afterComma += code[next].digitToInt(10) / 10.0.pow(numIts)
+        while(!end() && consume().isDigit()) {
+            afterComma += last().digitToInt(10) / 10.0.pow(numIts)
             numIts++
-            next++
         }
         val commaNum = (num + afterComma)
         return OnjToken(OnjTokenType.FLOAT, if (negative) -commaNum else commaNum, start)
+    }
+
+    private fun last(): Char = code[next - 1]
+    private fun next(): Char = code[next]
+    private fun consume(): Char {
+        next++
+        return last()
+    }
+    private fun tryConsume(char: Char): Boolean {
+        return if (code[next] == char) { next++ ; true } else false
     }
 
     private fun end(): Boolean = next == code.length

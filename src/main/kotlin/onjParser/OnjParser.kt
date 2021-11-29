@@ -365,7 +365,7 @@ class OnjParser {
 
         consume(OnjTokenType.L_PAREN)
 
-        val x = if (tryConsume(OnjTokenType.INT)) (last().literal as Int).toDouble()
+        val x = if (tryConsume(OnjTokenType.INT)) (last().literal as Long).toDouble()
         else if (tryConsume(OnjTokenType.FLOAT)) (last().literal as Double).toDouble()
         else if (tryConsume(OnjTokenType.EXCLAMATION)) {
             val value = parseVariable()
@@ -379,7 +379,7 @@ class OnjParser {
 
         tryConsume(OnjTokenType.COMMA)
 
-        val y = if (tryConsume(OnjTokenType.INT)) (last().literal as Int).toDouble()
+        val y = if (tryConsume(OnjTokenType.INT)) (last().literal as Long).toDouble()
         else if (tryConsume(OnjTokenType.FLOAT)) last().literal as Double
         else if (tryConsume(OnjTokenType.EXCLAMATION)) {
             val value = parseVariable()
@@ -403,7 +403,8 @@ class OnjParser {
 
     private fun tryConsume(type: OnjTokenType): Boolean {
         return if (current().isType(type)) {
-            next++; true
+            next++
+            true
         } else false
     }
 
