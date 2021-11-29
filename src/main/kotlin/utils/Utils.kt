@@ -17,6 +17,15 @@ object Utils {
     }
 
     /**
+     * finds the average vertex for a list of vertices
+     */
+    fun findVertexAverage(vertices: List<Vector2D>): Vector2D {
+        var acc = Vector2D()
+        vertices.forEach { acc += it }
+        return acc / vertices.size.toDouble()
+    }
+
+    /**
      * calculates the [centroid][https://en.wikipedia.org/wiki/Centroid] of a polygon
      */
     fun getPolygonCentroid(vertices: Array<Vector2D>): Vector2D {
@@ -179,4 +188,28 @@ fun max(vararg doubles: Double): Double {
     var max = -Double.MAX_VALUE
     for (double in doubles) if (double > max) max = double
     return max
+}
+
+fun maxY(vararg vectors: Vector2D): Double {
+    var max = -Double.MAX_VALUE
+    for (vector in vectors) if (vector.y > max) max = vector.y
+    return max
+}
+
+fun minY(vararg vectors: Vector2D): Double {
+    var min = Double.MAX_VALUE
+    for (vector in vectors) if (vector.y < min) min = vector.y
+    return min
+}
+
+fun <T : Number> List<T>.sum(): Double {
+    var sum = 0.0
+    for (num in this) sum += num.toDouble()
+    return sum
+}
+
+fun <T : Number> List<T>.average(): Double {
+    var sum = 0.0
+    for (num in this) sum += num.toDouble()
+    return sum / this.size
 }

@@ -41,10 +41,10 @@ class OnjParser {
 
         parseVariables(false)
 
-        val onjValue =  if (tryConsume(OnjTokenType.L_BRACE))
+        val onjValue = if (tryConsume(OnjTokenType.L_BRACE))
             parseObject(false, tokens[next], false).first!!
-            else if (tryConsume(OnjTokenType.L_BRACKET)) return parseArray(tokens[next], false).first!!
-            else parseObject(true, null, false).first!!
+        else if (tryConsume(OnjTokenType.L_BRACKET)) return parseArray(tokens[next], false).first!!
+        else parseObject(true, null, false).first!!
 
         schema?.match(onjValue, filename)
 
@@ -69,30 +69,38 @@ class OnjParser {
 
     private fun parseVariables(isSchema: Boolean) {
 
-        while(tryConsume(OnjTokenType.EXCLAMATION)) {
+        while (tryConsume(OnjTokenType.EXCLAMATION)) {
 
-            val identifier = if (tryConsume(OnjTokenType.IDENTIFIER)) { last().literal as String }
-                else throw OnjParserException.fromErrorToken(last(), OnjTokenType.IDENTIFIER, code, filename)
+            val identifier = if (tryConsume(OnjTokenType.IDENTIFIER)) {
+                last().literal as String
+            } else throw OnjParserException.fromErrorToken(last(), OnjTokenType.IDENTIFIER, code, filename)
 
             consume(OnjTokenType.EQUALS)
 
             val value: Any = if (!isSchema) parseValue()
-                else parseSchemaValue()
+            else parseSchemaValue()
 
             variables[identifier] = value
         }
     }
 
-    private fun parseObject(implicitEnd: Boolean, startToken: OnjToken?, isSchema: Boolean, nullable: Boolean = false): Pair<OnjObject?, OnjSchema?> {
+    private fun parseObject(
+        implicitEnd: Boolean,
+        startToken: OnjToken?,
+        isSchema: Boolean,
+        nullable: Boolean = false
+    ): Pair<OnjObject?, OnjSchema?> {
 
         val values: MutableMap<String, Any> = mutableMapOf()
 
-        while(!tryConsume(OnjTokenType.R_BRACE)) {
+        while (!tryConsume(OnjTokenType.R_BRACE)) {
 
             if (tryConsume(OnjTokenType.EOF)) {
                 if (implicitEnd) break
-                throw OnjParserException.fromErrorMessage(startToken!!.char, code,
-                    "Object is opened but never closed!", filename)
+                throw OnjParserException.fromErrorMessage(
+                    startToken!!.char, code,
+                    "Object is opened but never closed!", filename
+                )
             }
 
             val key: String = if (tryConsume(OnjTokenType.IDENTIFIER)) last().literal as String
@@ -102,13 +110,17 @@ class OnjParser {
                 val result = doTripleDot()
 
                 if (!isSchema) {
-                    if (result !is OnjObject) throw OnjParserException.fromErrorMessage(last().char, code,
-                        "Variable included via triple dot is not of type 'Object'", filename)
+                    if (result !is OnjObject) throw OnjParserException.fromErrorMessage(
+                        last().char, code,
+                        "Variable included via triple dot is not of type 'Object'", filename
+                    )
                     for (pair in result.value.entries) {
 
                         if (values.containsKey(pair.key))
-                            throw OnjParserException.fromErrorMessage(last().char, code,
-                                "Key '${pair.key}' included via Triple-Dot is already defined.", filename)
+                            throw OnjParserException.fromErrorMessage(
+                                last().char, code,
+                                "Key '${pair.key}' included via Triple-Dot is already defined.", filename
+                            )
 
                         values[pair.key] = pair.value
 
@@ -116,14 +128,18 @@ class OnjParser {
 
                     continue
                 } else {
-                    if (result !is OnjSchemaObject) throw OnjParserException.fromErrorMessage(last().char, code,
-                        "Variable included via triple dot is not of type 'Object'", filename)
+                    if (result !is OnjSchemaObject) throw OnjParserException.fromErrorMessage(
+                        last().char, code,
+                        "Variable included via triple dot is not of type 'Object'", filename
+                    )
 
                     for (pair in result.schema.entries) {
 
                         if (values.containsKey(pair.key))
-                            throw OnjParserException.fromErrorMessage(last().char, code,
-                                "Key '${pair.key}' included via Triple-Dot is already defined.", filename)
+                            throw OnjParserException.fromErrorMessage(
+                                last().char, code,
+                                "Key '${pair.key}' included via Triple-Dot is already defined.", filename
+                            )
 
                         values[pair.key] = pair.value
 
@@ -132,8 +148,7 @@ class OnjParser {
                     continue
                 }
 
-            }
-            else
+            } else
                 throw OnjParserException.fromErrorToken(last(), "Identifier or String-Identifier.", code, filename)
 
             if (values.containsKey(key))
@@ -149,26 +164,34 @@ class OnjParser {
         }
 
         return if (!isSchema) Pair(OnjObject(values as Map<String, OnjValue>), null)
-                else Pair(null, OnjSchemaObject(nullable, values as Map<String, OnjSchema>))
+        else Pair(null, OnjSchemaObject(nullable, values as Map<String, OnjSchema>))
     }
 
-    private fun parseArray(startToken: OnjToken, isSchema: Boolean, nullable: Boolean = false): Pair<OnjArray?, OnjSchemaArray?> {
+    private fun parseArray(
+        startToken: OnjToken,
+        isSchema: Boolean,
+        nullable: Boolean = false
+    ): Pair<OnjArray?, OnjSchemaArray?> {
 
         val values: MutableList<Any> = mutableListOf()
 
         while (!tryConsume(OnjTokenType.R_BRACKET)) {
 
             if (tryConsume(OnjTokenType.EOF))
-                throw OnjParserException.fromErrorMessage(startToken.char, code,
-                "Array is opened but never closed!", filename)
+                throw OnjParserException.fromErrorMessage(
+                    startToken.char, code,
+                    "Array is opened but never closed!", filename
+                )
 
             if (tryConsume(OnjTokenType.DOT)) {
 
                 val result = doTripleDot()
 
                 if (result !is OnjArray) //TODO: fix like object
-                    throw OnjParserException.fromErrorMessage(last().char, code,
-                        "Triple-Dot variable in array is not of type array.", filename)
+                    throw OnjParserException.fromErrorMessage(
+                        last().char, code,
+                        "Triple-Dot variable in array is not of type array.", filename
+                    )
 
                 for (dotValue in result.value) values.add(dotValue)
                 continue
@@ -182,7 +205,7 @@ class OnjParser {
         }
 
         return if (!isSchema) Pair(OnjArray(values as List<OnjValue>), null)
-            else Pair(null, OnjSchemaArray(nullable, values as List<OnjSchema>))
+        else Pair(null, OnjSchemaArray(nullable, values as List<OnjSchema>))
     }
 
 
@@ -218,16 +241,16 @@ class OnjParser {
     private fun parseValue(): OnjValue {
 
         return if (tryConsume(OnjTokenType.INT)) OnjInt(last().literal as Long)
-            else if (tryConsume(OnjTokenType.FLOAT)) OnjFloat(last().literal as Double)
-            else if (tryConsume(OnjTokenType.STRING)) OnjString(last().literal as String)
-            else if (tryConsume(OnjTokenType.BOOLEAN)) OnjBoolean(last().literal as Boolean)
-            else if (tryConsume(OnjTokenType.COLOR)) OnjColor(last().literal as Color)
-            else if (tryConsume(OnjTokenType.NULL)) OnjNull()
-            else if (tryConsume(OnjTokenType.L_BRACE)) parseObject(false, last(), false).first!!
-            else if (tryConsume(OnjTokenType.L_BRACKET)) parseArray(last(), false).first!!
-            else if (tryConsume(OnjTokenType.VEC2)) parseVec2()
-            else if (tryConsume(OnjTokenType.EXCLAMATION)) parseVariable()
-            else throw OnjParserException.fromErrorToken(current(), "Value", code, filename)
+        else if (tryConsume(OnjTokenType.FLOAT)) OnjFloat(last().literal as Double)
+        else if (tryConsume(OnjTokenType.STRING)) OnjString(last().literal as String)
+        else if (tryConsume(OnjTokenType.BOOLEAN)) OnjBoolean(last().literal as Boolean)
+        else if (tryConsume(OnjTokenType.COLOR)) OnjColor(last().literal as Color)
+        else if (tryConsume(OnjTokenType.NULL)) OnjNull()
+        else if (tryConsume(OnjTokenType.L_BRACE)) parseObject(false, last(), false).first!!
+        else if (tryConsume(OnjTokenType.L_BRACKET)) parseArray(last(), false).first!!
+        else if (tryConsume(OnjTokenType.VEC2)) parseVec2()
+        else if (tryConsume(OnjTokenType.EXCLAMATION)) parseVariable()
+        else throw OnjParserException.fromErrorToken(current(), "Value", code, filename)
     }
 
     private fun parseSchemaValue(): OnjSchema {
@@ -244,22 +267,26 @@ class OnjParser {
                 "color" -> OnjSchemaColor(isNullable)
                 "vec2" -> OnjSchemaVec2(isNullable)
                 else ->
-                    throw OnjParserException.fromErrorMessage(type.char, code,
-                        "Unknown type '${type.literal}'", filename)
+                    throw OnjParserException.fromErrorMessage(
+                        type.char, code,
+                        "Unknown type '${type.literal}'", filename
+                    )
             }
 
             if (tryConsume(OnjTokenType.L_BRACKET)) {
 
-                val amount = if (tryConsume(OnjTokenType.STAR)) - 1
-                    else if (tryConsume(OnjTokenType.INT)) {
-                        val res = last().literal as Int
-                        if (res < 0) throw OnjParserException.fromErrorMessage(last().char, code,
-                            "Array-length must be positive.", filename)
-                        res
-                    }
-
-                    else throw OnjParserException.fromErrorMessage(last().char, code,
-                    "Expected number or star.", filename)
+                val amount = if (tryConsume(OnjTokenType.STAR)) -1
+                else if (tryConsume(OnjTokenType.INT)) {
+                    val res = last().literal as Int
+                    if (res < 0) throw OnjParserException.fromErrorMessage(
+                        last().char, code,
+                        "Array-length must be positive.", filename
+                    )
+                    res
+                } else throw OnjParserException.fromErrorMessage(
+                    last().char, code,
+                    "Expected number or star.", filename
+                )
 
                 consume(OnjTokenType.R_BRACKET)
 
@@ -269,22 +296,20 @@ class OnjParser {
 
             }
             return schema
-        }
-
-        else if (tryConsume(OnjTokenType.L_BRACE))
+        } else if (tryConsume(OnjTokenType.L_BRACE))
             return parseObject(false, last(), true).second!!
-
         else if (tryConsume(OnjTokenType.EXCLAMATION)) return parseSchemaVariable()
         else if (tryConsume(OnjTokenType.L_BRACKET)) return parseArray(last(), true).second!!
-
         else if (tryConsume(OnjTokenType.QUESTION)) {
 
             if (tryConsume(OnjTokenType.L_BRACE))
                 return parseObject(false, last(), isSchema = true, nullable = true).second!!
             if (tryConsume(OnjTokenType.L_BRACKET))
                 return parseArray(last(), isSchema = true, nullable = true).second!!
-            throw OnjParserException.fromErrorMessage(last().char, code,
-                "Expected start of object or array!", filename)
+            throw OnjParserException.fromErrorMessage(
+                last().char, code,
+                "Expected start of object or array!", filename
+            )
         }
 
         throw OnjParserException.fromErrorMessage(current().char, code, "Expected type.", filename)
@@ -299,7 +324,8 @@ class OnjParser {
 
         return (variables[name] as OnjValue?) ?: throw OnjParserException.fromErrorMessage(
             last().char, code,
-            "Variable '$name' isn't defined.", filename)
+            "Variable '$name' isn't defined.", filename
+        )
     }
 
     private fun parseSchemaVariable(): OnjSchema {
@@ -311,7 +337,8 @@ class OnjParser {
 
         var schema = (variables[name] as OnjSchema?) ?: throw OnjParserException.fromErrorMessage(
             last().char, code,
-            "Variable '$name' isn't defined.", filename)
+            "Variable '$name' isn't defined.", filename
+        )
 
         if (tryConsume(OnjTokenType.QUESTION)) schema = schema.getAsNullable()
 
@@ -319,8 +346,10 @@ class OnjParser {
         if (tryConsume(OnjTokenType.L_BRACKET)) {
             val amount = if (tryConsume(OnjTokenType.STAR)) -1
             else if (tryConsume(OnjTokenType.INT)) last().literal as Int
-            else throw OnjParserException.fromErrorMessage(last().char, code,
-                "Expected number or star.", filename)
+            else throw OnjParserException.fromErrorMessage(
+                last().char, code,
+                "Expected number or star.", filename
+            )
 
             consume(OnjTokenType.R_BRACKET)
 
@@ -336,29 +365,31 @@ class OnjParser {
 
         consume(OnjTokenType.L_PAREN)
 
-        val x = if (tryConsume(OnjTokenType.INT)) (last().literal as Int).toDouble()
+        val x = if (tryConsume(OnjTokenType.INT)) (last().literal as Long).toDouble()
         else if (tryConsume(OnjTokenType.FLOAT)) (last().literal as Double).toDouble()
         else if (tryConsume(OnjTokenType.EXCLAMATION)) {
-                val value = parseVariable()
-                if (value.isInt()) (value as OnjInt).value.toDouble()
-                else if (value.isFloat()) (value as OnjFloat).value.toDouble()
-                else throw OnjParserException.fromErrorMessage(last().char, code,
-                    "Variable must be of type Int or Float.", filename)
-        }
-        else throw OnjParserException.fromErrorToken(last(), "Number", code, filename)
+            val value = parseVariable()
+            if (value.isInt()) (value as OnjInt).value.toDouble()
+            else if (value.isFloat()) (value as OnjFloat).value.toDouble()
+            else throw OnjParserException.fromErrorMessage(
+                last().char, code,
+                "Variable must be of type Int or Float.", filename
+            )
+        } else throw OnjParserException.fromErrorToken(last(), "Number", code, filename)
 
         tryConsume(OnjTokenType.COMMA)
 
-        val y = if (tryConsume(OnjTokenType.INT)) (last().literal as Int).toDouble()
+        val y = if (tryConsume(OnjTokenType.INT)) (last().literal as Long).toDouble()
         else if (tryConsume(OnjTokenType.FLOAT)) last().literal as Double
         else if (tryConsume(OnjTokenType.EXCLAMATION)) {
             val value = parseVariable()
             if (value.isInt()) (value as OnjInt).value.toDouble()
             else if (value.isFloat()) (value as OnjFloat).value.toDouble()
-            else throw OnjParserException.fromErrorMessage(last().char, code,
-                "Variable must be of type Int or Float.", filename)
-        }
-        else throw OnjParserException.fromErrorToken(last(), "Number", code, filename)
+            else throw OnjParserException.fromErrorMessage(
+                last().char, code,
+                "Variable must be of type Int or Float.", filename
+            )
+        } else throw OnjParserException.fromErrorToken(last(), "Number", code, filename)
 
         consume(OnjTokenType.R_PAREN)
 
@@ -371,8 +402,10 @@ class OnjParser {
     }
 
     private fun tryConsume(type: OnjTokenType): Boolean {
-        return if (current().isType(type)) { next++ ; true }
-        else false
+        return if (current().isType(type)) {
+            next++
+            true
+        } else false
     }
 
     private fun last(): OnjToken = tokens[next - 1]
@@ -404,14 +437,21 @@ class OnjParserException(message: String, cause: Exception?) : RuntimeException(
 
     companion object {
 
-        fun fromErrorToken(errorToken: OnjToken, expectedTokenType: OnjTokenType, code: String, filename: String): OnjParserException {
-            return fromErrorMessage(errorToken.char, code,
+        fun fromErrorToken(
+            errorToken: OnjToken,
+            expectedTokenType: OnjTokenType,
+            code: String,
+            filename: String
+        ): OnjParserException {
+            return fromErrorMessage(
+                errorToken.char, code,
                 "Unexpected Token '${errorToken.type}', expected '${expectedTokenType}'.\u001B[0m\n", filename
             )
         }
 
         fun fromErrorToken(errorToken: OnjToken, expected: String, code: String, filename: String): OnjParserException {
-            return fromErrorMessage(errorToken.char, code,
+            return fromErrorMessage(
+                errorToken.char, code,
                 "Unexpected Token '${errorToken.type}', expected $expected.\u001B[0m\n", filename
             )
         }

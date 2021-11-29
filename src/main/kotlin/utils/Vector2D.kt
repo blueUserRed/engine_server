@@ -68,6 +68,14 @@ class Vector2D (val x: Double, val y: Double) {
         return this.unit * mag
     }
 
+    infix fun withX(x: Double): Vector2D {
+        return Vector2D(x, this.y)
+    }
+
+    infix fun withY(y: Double): Vector2D {
+        return Vector2D(this.x, y)
+    }
+
     infix fun dot(other: Vector2D): Double {
         return this.x * other.x + this.y * other.y
     }
