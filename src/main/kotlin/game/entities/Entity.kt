@@ -12,7 +12,12 @@ import java.util.*
  * an entity in the game
  * @param position the position of the entity (center)
  */
-abstract class Entity(var position: Vector2D) {
+abstract class Entity(position: Vector2D) {
+
+    /**
+     * the position of the entity (center)
+     */
+    var position: Vector2D = position
 
     /**
      * the rotation of the entity around its center in rad
@@ -93,6 +98,11 @@ abstract class Entity(var position: Vector2D) {
     var isCollidable: Boolean = true
 
     /**
+     * if set to true, no collision will be resolved, but collisionsChecks are still performed
+     */
+    var skipCollisionResolution: Boolean = false
+
+    /**
      * stores which lock applies to the entity
      */
     var lockState: LockState = LockState.NONE
@@ -152,10 +162,10 @@ abstract class Entity(var position: Vector2D) {
      * @param offset the offset from the center at which the force is applied; offsenter forces lead to the entity
      * starting to rotate. default is (0, 0) = center
      */
-   fun applyForce(force: Vector2D, offset: Vector2D = Vector2D()) {
-       velocity += force * (1 / mass)
-       angularVelocity += (1 / inertia) * (offset cross force)
-   }
+    fun applyForce(force: Vector2D, offset: Vector2D = Vector2D()) {
+        velocity += force * (1 / mass)
+        angularVelocity += (1 / inertia) * (offset cross force)
+    }
 
     /**
      * applies a purely rotational force to the entity

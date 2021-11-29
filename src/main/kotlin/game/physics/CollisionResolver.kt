@@ -30,6 +30,8 @@ class MainCollisionResolver : CollisionResolver {
         ent1.contactsAccessor.add(ent2)
         ent2.contactsAccessor.add(ent1)
 
+        if (ent1.skipCollisionResolution || ent2.skipCollisionResolution) return
+
         val mtv = information.mtv
         val normal = information.mtv.unit * -1.0
         val colPoint = information.colPoint ?: return
@@ -62,7 +64,7 @@ class MainCollisionResolver : CollisionResolver {
         val raCrossN = ra cross normal
         val rbCrossN = rb cross normal
         val invMassSum = ( 1 / ent1.mass) + (1 / ent2.mass) + raCrossN * raCrossN *
-                        (1 / ent1.inertia) + rbCrossN * rbCrossN * (1 / ent2.inertia)
+                (1 / ent1.inertia) + rbCrossN * rbCrossN * (1 / ent2.inertia)
 
         var j = (-(1.0f + e) * contactVel)
         j /= invMassSum
