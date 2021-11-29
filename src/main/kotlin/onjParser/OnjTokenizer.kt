@@ -69,6 +69,7 @@ class OnjTokenizer {
             }
         }
         while (!end() && (consume().isHexadecimal()));
+        next--
         val name = code.substring(start, next)
         try {
             return OnjToken(OnjTokenType.COLOR, Color.valueOf(name), start)
