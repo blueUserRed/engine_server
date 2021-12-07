@@ -62,7 +62,7 @@ class ClientConnection(private val socket: Socket, private val server: Server, v
             receiver.receive(message, this)
             for (i in 1..7) input.readByte() //trailer
         } catch(e: IOException) { break } }
-        for (callback in onFinishedCallbacks) callback()
+        synchronized(onFinishedCallbacks) { for (callback in onFinishedCallbacks) callback() }
     }
 
 
@@ -132,7 +132,7 @@ class ClientConnection(private val socket: Socket, private val server: Server, v
      * adds a new callback that is executed when the connection closes
      * @param callback the callback
      */
-    fun addOnFinishedCallback(callback: () -> Unit) {
+    fun addOnFinishedCallback(callback: () -> Unit) = synchronized(onFinishedCallbacks) {
         onFinishedCallbacks.add(callback)
     }
 
@@ -140,7 +140,7 @@ class ClientConnection(private val socket: Socket, private val server: Server, v
      * removes a callback that was previously added using [addOnFinishedCallback]
      * @param callback the callback
      */
-    fun removeOnFinishedCallback(callback: () -> Unit) {
+    fun removeOnFinishedCallback(callback: () -> Unit) = synchronized(onFinishedCallbacks) {
         onFinishedCallbacks.remove(callback)
     }
 
