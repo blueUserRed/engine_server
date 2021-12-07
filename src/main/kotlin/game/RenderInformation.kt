@@ -86,20 +86,23 @@ class PolyImageRenderInfo(
     var width: Double,
     var height: Double,
     var imgIdentifier: String
-    ) : RenderInformation() {
+) : RenderInformation() {
 
     override val identifier: Int = Int.MAX_VALUE - 2
+
+    var flip: Boolean = false
 
     override fun serialize(output: DataOutputStream) {
         offset.serialize(output)
         output.writeDouble(width)
         output.writeDouble(height)
         output.writeUTF(imgIdentifier)
+        output.writeBoolean(flip)
     }
 
     override fun equals(other: Any?): Boolean {
         return other is PolyImageRenderInfo && other.offset == this.offset && other.width.compare(this.width) &&
-                other.height.compare(this.height) && other.imgIdentifier == this.imgIdentifier
+                other.height.compare(this.height) && other.imgIdentifier == this.imgIdentifier && flip == other.flip
     }
 
 }

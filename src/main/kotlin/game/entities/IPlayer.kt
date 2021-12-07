@@ -23,9 +23,4 @@ interface IPlayer {
      */
     val keyInputController: KeyInputController
 
-    /**
-     * called every step, should update the player according to the keyInputs
-     */
-    fun handleKeyInputs()
-
 }

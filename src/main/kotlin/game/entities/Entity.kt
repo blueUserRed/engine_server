@@ -3,7 +3,6 @@ package game.entities
 import game.*
 import game.physics.AABB
 import game.entities.shadow.EntityShadow
-import onjParser.OnjObject
 import utils.Vector2D
 import java.io.DataOutputStream
 import java.util.*
@@ -90,7 +89,7 @@ abstract class Entity(position: Vector2D) {
     val uuid: UUID = UUID.randomUUID()
 
     var isMarkedForRemoval: Boolean = false
-        private set
+        internal set
 
     /**
      * if false, nothing can collide with the entity
@@ -132,13 +131,17 @@ abstract class Entity(position: Vector2D) {
     abstract val aabb: AABB
 
     /**
+     * callbacks that are executed before the entity is removed
+     */
+    private val onRemovalCallbacks: MutableList<() -> Unit> = mutableListOf()
+
+    /**
      * called every physics-step, updates the object
      *
      * _Note: when overriding, call `super.update()` for behaviours and keyinputs to be updated correctly._
      */
     open fun update() {
         for (behavior in this.behaviors) behavior.update(this)
-        player?.handleKeyInputs()
     }
 
     /**
@@ -223,7 +226,7 @@ abstract class Entity(position: Vector2D) {
     internal open fun updateShadow() {
         shadow.position = position
         shadow.rotation = rotation
-        shadow.renderInformation = renderInformation
+        shadow.renderInformation = renderInformation //TODO: probably dosent work. clone?
     }
 
     /**
@@ -273,6 +276,27 @@ abstract class Entity(position: Vector2D) {
         isMarkedForRemoval = true
     }
 
+    /**
+     * called when the entity is about to be removed; when overriding call `super.onRemoval()`
+     */
+    open fun onRemoval() {
+        for (callback in onRemovalCallbacks) callback()
+    }
+
+    /**
+     * adds a callback that is executed when the entity is about to be removed
+     */
+    fun addOnRemovalCallback(callback: () -> Unit) {
+        onRemovalCallbacks.add(callback)
+    }
+
+    /**
+     * removes a callback that was previously added using [addOnRemovalCallback]
+     */
+    fun removeOnRemovalCallback(callback: () -> Unit) {
+        onRemovalCallbacks.remove(callback)
+    }
+
     enum class LockState {
         FULL_LOCK, ROTATION_LOCK, TRANSLATION_LOCK, NONE
     }
@@ -288,5 +312,3 @@ abstract class Entity(position: Vector2D) {
         const val DEFAULT_COLLMASK_BIT: Long  = 0b01000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000
     }
 }
-
-typealias FromOnjEntityDeserializer = (OnjObject) -> Entity?

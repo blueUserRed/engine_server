@@ -108,6 +108,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
         while(entsIt.hasNext()) {
             val ent = entsIt.next()
             if (ent.isMarkedForRemoval) {
+                ent.onRemoval()
                 entsIt.remove()
                 continue
             }
@@ -205,6 +206,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
      * @param ent The entity that should be added
      */
     fun addEntity(ent: Entity) {
+        ent.isMarkedForRemoval = false
         this.entities.add(ent)
     }
 
