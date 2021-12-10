@@ -1,6 +1,5 @@
 package game
 
-import onjParser.OnjObject
 import utils.Vector2D
 import utils.compare
 import java.io.DataOutputStream
@@ -24,6 +23,8 @@ abstract class RenderInformation {
 
     abstract override fun equals(other: Any?): Boolean
 
+    abstract fun clone(): RenderInformation
+
 }
 
 /**
@@ -40,6 +41,7 @@ class EmptyRenderInfo : RenderInformation()  {
         return other is EmptyRenderInfo
     }
 
+    override fun clone(): RenderInformation = EmptyRenderInfo()
 }
 
 /**
@@ -71,6 +73,11 @@ class PolyColorRenderInfo : RenderInformation() {
         return other is PolyColorRenderInfo && other.color == color && other.scale == scale
     }
 
+    override fun clone(): RenderInformation {
+        val polyColorRenderInfo = PolyColorRenderInfo()
+        polyColorRenderInfo.color = color
+        return polyColorRenderInfo
+    }
 }
 
 /**
@@ -105,9 +112,10 @@ class PolyImageRenderInfo(
                 other.height.compare(this.height) && other.imgIdentifier == this.imgIdentifier && flip == other.flip
     }
 
+    override fun clone(): RenderInformation {
+        return PolyImageRenderInfo(offset, width, height, imgIdentifier)
+    }
 }
-
-typealias FromOnjRenderInformationDeserializer = (obj: OnjObject) -> RenderInformation?
 
 //
 //class CircleColorRenderInfo : RenderInformation() {

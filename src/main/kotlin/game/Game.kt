@@ -93,6 +93,11 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     private var updateCallbacks: MutableList<() -> Unit> = mutableListOf()
 
     /**
+     * list containing all entities that where removed this step
+     */
+    val graveyard: MutableList<Entity> = mutableListOf()
+
+    /**
      * starts the game
      */
     fun start() {
@@ -104,11 +109,13 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
      * updates entities, does substeps, calls [updateCallbacks] and [updateInStepCallbacks] and [doCollisions]
      */
     private suspend fun update() = coroutineScope { try { //TODO: this is even more stupid than before
+        graveyard.clear()
         val entsIt = entities.iterator()
-        while(entsIt.hasNext()) {
+        while (entsIt.hasNext()) {
             val ent = entsIt.next()
             if (ent.isMarkedForRemoval) {
                 ent.onRemoval()
+                graveyard.add(ent)
                 entsIt.remove()
                 continue
             }
@@ -208,6 +215,7 @@ class Game(val tag: Int, val server: Server) : MessageReceiver {
     fun addEntity(ent: Entity) {
         ent.isMarkedForRemoval = false
         this.entities.add(ent)
+        ent.initialize()
     }
 
     /**

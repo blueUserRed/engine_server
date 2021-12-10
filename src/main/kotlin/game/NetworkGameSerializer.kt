@@ -55,5 +55,11 @@ open class MainNetworkGameSerializer : NetworkGameSerializer() {
             ent.serializeInc(output)
         }
         output.writeInt(Int.MIN_VALUE)
+        for (ent in game.graveyard) {
+            output.writeInt(ent.identifier)
+            output.writeLong(ent.uuid.mostSignificantBits)
+            output.writeLong(ent.uuid.leastSignificantBits)
+        }
+        output.writeInt(Int.MIN_VALUE)
     }
 }

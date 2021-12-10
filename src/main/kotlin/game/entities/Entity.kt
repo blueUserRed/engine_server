@@ -226,7 +226,7 @@ abstract class Entity(position: Vector2D) {
     internal open fun updateShadow() {
         shadow.position = position
         shadow.rotation = rotation
-        shadow.renderInformation = renderInformation //TODO: probably dosent work. clone?
+        shadow.renderInformation = renderInformation.clone()
     }
 
     /**
@@ -281,6 +281,14 @@ abstract class Entity(position: Vector2D) {
      */
     open fun onRemoval() {
         for (callback in onRemovalCallbacks) callback()
+    }
+
+    /**
+     * called when the entity is added to a game. call `super.initialize()` when overriding
+     */
+    open fun initialize() {
+        isMarkedForRemoval = false
+        shadow.isNew = true
     }
 
     /**
