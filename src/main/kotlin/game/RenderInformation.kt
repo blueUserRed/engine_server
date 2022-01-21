@@ -113,7 +113,9 @@ class PolyImageRenderInfo(
     }
 
     override fun clone(): RenderInformation {
-        return PolyImageRenderInfo(offset, width, height, imgIdentifier)
+        val info = PolyImageRenderInfo(offset, width, height, imgIdentifier)
+        info.flip = flip
+        return info
     }
 }
 
