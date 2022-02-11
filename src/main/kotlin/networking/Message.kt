@@ -3,7 +3,6 @@ package networking
 import game.Conf
 import game.Game
 import game.KeyCode
-import utils.ThisShouldNeverBeThrownException
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -27,7 +26,7 @@ abstract class Message {
     /**
      * serializes the message, so it can be sent over to the client
      */
-    abstract fun serialize(output: DataOutputStream)
+    abstract fun serialize(output: DataOutputStream, con: ClientConnection)
 
     companion object {
 
@@ -64,7 +63,7 @@ class HeartBeatMessage(val isResponse: Boolean, val testString: String) : Messag
         else con.send(HeartBeatMessage(true, testString))
     }
 
-    override fun serialize(output: DataOutputStream) {
+    override fun serialize(output: DataOutputStream, con: ClientConnection) {
         output.writeBoolean(isResponse)
         output.writeUTF(testString)
     }
@@ -80,10 +79,9 @@ class FullUpdateMessage(val game: Game) : Message() {
     override val identifier: String = "fullUpdt"
 
     override fun execute(con: ClientConnection, game: Game?) {
-        throw ThisShouldNeverBeThrownException()
     }
 
-    override fun serialize(output: DataOutputStream) {
+    override fun serialize(output: DataOutputStream, con: ClientConnection) {
         game.networkGameSerializer.serialize(output, game)
     }
 
@@ -98,10 +96,9 @@ class IncrementalUpdateMessage(val game: Game) : Message() {
     override val identifier: String = "incUpdt"
 
     override fun execute(con: ClientConnection, game: Game?) {
-        throw ThisShouldNeverBeThrownException()
     }
 
-    override fun serialize(output: DataOutputStream) {
+    override fun serialize(output: DataOutputStream, con: ClientConnection) {
         game.networkGameSerializer.serializeIncremental(output, game)
     }
 }
@@ -120,7 +117,7 @@ class ClientInfoMessage(val keys: List<KeyCode>) : Message() {
         player.keyInputController.updatePresses(keys)
     }
 
-    override fun serialize(output: DataOutputStream) {
+    override fun serialize(output: DataOutputStream, con: ClientConnection) {
         output.writeInt(keys.size)
         for (key in keys) output.writeInt(key.code)
     }
